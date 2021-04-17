@@ -1,7 +1,7 @@
 # CMCL-Windows
 ## Introduction
 >This is a wonderful Minecraft Launcher called Convenient Minecraft Launcher.  
->We supported the Minecraft version which is higher than 1.7.10(Contain!)
+>We supported the Minecraft version which is higher than 1.7.10(Contain!)  
 >Convenient Minecraft Launcher is called CMCL by most people who knew it.  
 >It's easy to use and you can set the custom settings.   
 >In addition to these,it can also launch a server.  

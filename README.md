@@ -9,8 +9,12 @@
 ## Using
 ### Developing Version
 Step 1.Download nwjs:[Chinese mirror](https://npm.taobao.org/mirrors/nwjs/).  
-If you want to get the great experience,you should use nwjs over v0.40.0.
-Step 2.Make a directory named app in the directory which contained nwjs.exe
-Step 3.If you are a Chinese-User,double-click launch.exe ,change to setting page and change mirrors.  
+If you want to get the great experience,you should use nwjs over v0.40.0.  
+Step 2.Make a directory named app in the directory which contained nwjs.exe  
+### Stable Version
+Step 1.Download it from Releases.  
+Step 2.Uncompress it.  
+### Both
+Step 3.Double-click launch.exe.If you are a Chinese-User,change to setting page and change mirrors.  
 Step 4.Change to Downloading Page to download Minecraft.  
 Step 5.Relaunch it and launch Minecraft.

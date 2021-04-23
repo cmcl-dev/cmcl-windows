@@ -1,0 +1,21 @@
+{
+  "main": "index.html",
+  "name": "Minecraft-Launcher",
+  "dependencies": {
+    "compressing": "^1.5.1",
+    "minecraft-launcher-core": "^3.16.2",
+    "node-fetch": "^2.6.1",
+    "progress-stream": "^2.0.0",
+    "promising-a-stream": "^1.0.0",
+    "request": "^2.88.2",
+    "stream-to-promise": "^3.0.0"
+  },
+  
+  "window": {
+    "icon": "command.png"
+  },
+  "node-main": "services.js",
+  "description": "demo app of node-webkit",
+  "chromium-args": "--enable-node-worker",
+  "version": "0.9.7"
+}

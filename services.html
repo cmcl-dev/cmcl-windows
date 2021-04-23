@@ -1,0 +1,155 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="shortcut icon" type="image/png" href="command.png" />
+<title>下载窗口</title>
+</head>
+<body>
+<div>
+当前进度：<span id="part_range">0%</span><br />
+总进度：<span id="all_range">0%</span>
+
+</div>
+<div style="position:absolute;width:99vw;bottom:80%;">
+<span onmouseover="document.querySelector('#logs').hidden=false;document.querySelector('#fixs').hidden=true ;" class="tags">日志</span>
+<span onmouseover="document.querySelector('#logs').hidden=true ;document.querySelector('#fixs').hidden=false;" class="tags">依赖</span></div>
+<div id="logs" style="width:99vw;height:80%;position:absolute;bottom:0;overflow:scroll;border:1px solid black;"></div>
+<div id="fixs" style="width:99vw;height:80%;position:absolute;bottom:0;overflow:scroll;border:1px solid black;" hidden>
+<h1>重新下载失败依赖</h1>
+<table>
+<thead>
+<tr>
+<td><input type="checkbox" id="all_choose_1" /></td>
+<td>类型</td>
+<td>代号</td>
+<td>路径</td>
+<td>操作</td>
+<td>进度</td>
+</tr>
+</thead>
+<tbody id="tbody">
+
+</tbody>
+</table>
+<style>
+.tags{
+border-top:1px solid #C88;
+border-left:1px solid #EEEEEE;
+border-right:1px solid #EEEEEE;
+text-size:20px;
+}
+tr{
+border-top:1px solid #000;
+}
+td{
+min-width:100px;
+border-left:1px black solid;
+border-top:1px solid #000;
+}
+td:first-child{
+width:10px;
+}
+td:last-child{
+width:200px;
+}
+table{
+    border-width:1px 1px 1px 0px;
+	border-color:black;
+	border-style:solid;
+}
+</style>
+</div>
+<!--
+<script src="services.js"></script>
+-->
+<script>
+window.$=function(doc){return document.querySelector(doc);}
+let worker;
+const fs=require("fs")
+let branch_worker=[];
+if(!window["debug_judge"]){
+
+worker=new Worker("./services.js");
+worker.postMessage(JSON.stringify({
+main_exec:true,
+ver_arr:ver_arr,
+url_arr:url_arr,
+d_num:d_num,
+assets_root:assets_root,
+localStorage:localStorage
+}));
+worker.onmessage=function(ev){
+console.log(ev);
+let e={data:JSON.parse(ev.data)};
+if(e.data.type=="log"){
+$("#logs").innerHTML+=e.data.value;
+}
+if(e.data.type=="process"){
+$("#all_range").innerHTML=e.data.value+"%";
+}
+if(e.data.type=="part_process"){
+$("#part_range").innerHTML=e.data.value+"%";
+}
+if(e.data.type=="create_worker"){
+eval(e.data.value);
+}
+if(e.data.type=="failed_libraries"||e.data.type=="failed_assets"){
+let line=document.createElement("tr");
+let a1=document.createElement("td");
+let a1_checkbox=document.createElement("input");
+a1_checkbox.type="checkbox";
+a1.appendChild(a1_checkbox);
+let a2=document.createElement("td");
+if(e.data.type=="failed_libraries")
+a2.innerHTML="类库(*.jar)";
+else 
+a2.innerHTML="资源(*)";
+let a3=document.createElement("td");
+a3.innerHTML=e.data.value.x;
+let a4=document.createElement("td");
+a4.innerHTML=e.data.value.y;
+let a5=document.createElement("td");
+let a5_1=document.createElement("a");
+a5_1.innerHTML="重试";
+a5_1.href="javascript:void 0";
+if(e.data.type=="failed_libraries")
+a5_1.onclick=new Function(`re_download_libraries(this);`);
+else
+a5_1.onclick=new Function(`re_download_assets(this);`);
+a5_1["dataset"]["path"]=e.data.value.y;
+a5_1["dataset"]["url"]=e.data.value.z;
+let a5_2=document.createElement("a");
+a5_2.innerHTML="放弃";
+a5_2.onclick=function(){this.parentNode.parentNode.hidden=true;};
+a5_2.href="javascript:void 0";
+
+
+a5.appendChild(a5_2);
+let a6=document.createElement("td");
+let a6_1=document.createElement("progress");
+a5_1["download_progress"]=a6_1;
+let a5_3=document.createElement("span");
+a5_3.innerHTML='|';
+a5.appendChild(a5_3);
+a5.appendChild(a5_1);
+a6_1.min=0;
+a6_1.max=100;
+a6.appendChild(a6_1)
+line.appendChild(a1);
+line.appendChild(a2);
+line.appendChild(a3);
+line.appendChild(a4);
+line.appendChild(a5);
+line.appendChild(a6);
+$("tbody").appendChild(line)
+}
+}
+
+}
+
+</script>
+<script src="./main-thread.js"></script>
+<script src="./natives.js"></script>
+</body>
+</html>

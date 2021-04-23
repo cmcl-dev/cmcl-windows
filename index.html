@@ -1,0 +1,839 @@
+﻿<!doctype html>
+<html>
+<head>
+<link rel="shortcut icon" type="image/png" href="command.png" />
+<script>
+//@xmcl/installer
+//minecraft-launcher-core
+
+window.$=function(c){return document.querySelector(c);}
+const cp=require('child_process');
+const fs=require('fs');
+const http=require('http');
+const https=require('https');
+const path=require('path');
+const os=require('os');
+
+
+window.launcher={
+name:"CMCL",
+type:"pro",
+version:"v1.7-pre"
+};
+//window.__dirname=path.dirname(process.execPath)
+window.__dirname=localStorage["dirname"]?localStorage["dirname"]:(process.cwd());
+window.asset=0;
+window.https_agent=new https.Agent({timeout:60000});
+window.http_agent=new http.Agent({timeout:60000});
+
+window.local_url_arr=[
+"https://launchermeta.mojang.com/v1/packages/b71bae449192fbbe1582ff32fb3765edf0b9b0a8/1.6.4.json",
+"https://launchermeta.mojang.com/v1/packages/83a7d28760ed623225e7cb2e29db140cc68540e8/1.7.2.json",
+"https://launchermeta.mojang.com/v1/packages/b06faa2910235ba9ecfab434e54e04a0d5f6187d/1.7.4.json",
+"https://launchermeta.mojang.com/v1/packages/a0481eaa9979795bb567398a02cc3d7a3775403a/1.7.5.json",
+"https://launchermeta.mojang.com/v1/packages/4cdba7fb4ea885d508bf7469812bdcee6b490681/1.7.6.json",
+"https://launchermeta.mojang.com/v1/packages/ef55209910a073339aadf8394bb3504f6c03048c/1.7.7.json",
+"https://launchermeta.mojang.com/v1/packages/b9b245eb23540c2bb1f5886b1d3a353870c8b684/1.7.8.json",
+"https://launchermeta.mojang.com/v1/packages/930a26a3c81803e2f6b9a4069ac14c2e7aaf3b8a/1.7.9.json",
+"https://launchermeta.mojang.com/v1/packages/2e818dc89e364c7efcfa54bec7e873c5f00b3840/1.7.10.json",
+"https://launchermeta.mojang.com/v1/packages/c6309181ce8df8a06ed556e315cd4636c4082b9a/1.8.json",
+"https://launchermeta.mojang.com/v1/packages/cc3bf2b602bcb4d55b4581ea9bb55c4e4b2d9bc9/1.8.1.json",
+"https://launchermeta.mojang.com/v1/packages/05655de45c43872c48eea1e07ae9740bc4cdf47e/1.8.2.json",
+"https://launchermeta.mojang.com/v1/packages/94f0e372077d0fe6cfeaad990b2c25ba67b3531c/1.8.3.json",
+"https://launchermeta.mojang.com/v1/packages/bf6b4b4bef435804faacc6fb8d350119a7482262/1.8.4.json",
+"https://launchermeta.mojang.com/v1/packages/ced2d59fde6e68ca9e84bbb00e5c7dc9c052df06/1.8.5.json",
+"https://launchermeta.mojang.com/v1/packages/13b52ffde81121125d69aec94589abfba7e04147/1.8.6.json",
+"https://launchermeta.mojang.com/v1/packages/87c78678d155ff55fc91fc64a7a84f2daf855f1e/1.8.7.json",
+"https://launchermeta.mojang.com/v1/packages/389ee2576f1c7ac6efe0edcec79f2e465d2a5278/1.8.8.json",
+"https://launchermeta.mojang.com/v1/packages/856d9bec08b0d567de39f46efaf4b76066b53059/1.8.9.json",
+"https://launchermeta.mojang.com/v1/packages/fab85b386a3de3009e5944b0183ce063faa09691/1.9.json",
+"https://launchermeta.mojang.com/v1/packages/a7c5c055718d8e7d709f3f2338b4e8f1125b5aae/1.9.1.json",
+"https://launchermeta.mojang.com/v1/packages/3cc8cee91366290508c8767e8826c6352c2b89c5/1.9.2.json",
+"https://launchermeta.mojang.com/v1/packages/e8bab05ecee645e3c9b962f532ca7fd6c52e120e/1.9.3.json",
+"https://launchermeta.mojang.com/v1/packages/7f40b382dedcfe9eca74a5b14d615075ec34c108/1.9.4.json",
+"",
+"",
+"",
+"",
+"",
+"",
+"",
+"",
+"",
+""
+
+];
+window.local_ver_arr=[
+"1.6.4",
+"1.7.2",
+"1.7.4",
+"1.7.5",
+"1.7.6",
+"1.7.7",
+"1.7.8",
+"1.7.9",
+"1.7.10",
+"1.8",
+"1.8.1",
+"1.8.2",
+"1.8.3",
+"1.8.4",
+"1.8.5",
+"1.8.6",
+"1.8.7",
+"1.8.8",
+"1.8.9",
+"1.9"
+];
+  
+localStorage["api"]=localStorage["api"]?(localStorage["api"]):((function(){return "local";})());
+if(localStorage["api"]=="local"){
+window.url_arr=window.local_url_arr;
+window.ver_arr=window.local_ver_arr;
+window.assets_root="https://resources.download.minecraft.net";
+}
+else if(localStorage["api"]=="bmcl"){
+var obj=JSON.parse(fs.readFileSync(path.join(__dirname,"./mcfiles/mojang_versions.json")));
+var ver=obj.versions;
+window.url_arr=[];
+window.ver_arr=[];
+for (var s=ver.length-1;s--;){
+if(ver[s].type!=="old_alpha"){
+url_arr.push(ver[s].url);
+ver_arr.push(ver[s].id);
+}
+
+}
+window.assets_root="https://bmclapi2.bangbang93.com/assets";
+}
+else if(localStorage["api"]=="mojang"){
+var obj=JSON.parse(fs.readFileSync(path.join(__dirname,"./mcfiles/mojang_versions.json")));
+window.mojang_ver=obj.versions;
+window.url_arr=[];
+window.ver_arr=[];
+for (var s=mojang_ver.length-1;s--;){
+if(mojang_ver[s].type!=="old_alpha"){
+url_arr.push(mojang_ver[s].url);
+ver_arr.push(mojang_ver[s].id);
+}
+window.assets_root="https://resources.download.minecraft.net";
+}
+}
+else if(localStorage["api"]=="mcbbs"){
+var obj=JSON.parse(fs.readFileSync(path.join(__dirname,"./mcfiles/mojang_versions.json")));
+var ver=obj.versions;
+window.url_arr=[];
+window.ver_arr=[];
+for (var s=ver.length-1;s--;){
+if(ver[s].type!=="old_alpha"){
+url_arr.push(ver[s].url);
+ver_arr.push(ver[s].id);
+}
+
+}
+window.assets_root="https://download.mcbbs.net/assets";
+}
+else if(localStorage["api"]=="custom"){
+var obj=JSON.parse(fs.readFileSync(path.join(__dirname,"./mcfiles/mojang_versions.json")));
+window.mojang_ver=obj.versions;
+window.url_arr=[];
+window.ver_arr=[];
+for (var s=mojang_ver.length-1;s--;){
+if(mojang_ver[s].type!=="old_alpha"){
+url_arr.push(mojang_ver[s].url);
+ver_arr.push(mojang_ver[s].id);
+}
+window.assets_root=localStorage["custom_assets"];
+}
+}
+
+
+
+window.c=0;
+window.ar_s=0;
+
+window.r=function(){location.reload();};
+</script>
+<script>
+with(global){
+require_=require;
+__dirname_=__dirname;
+}
+
+</script>
+<script>
+
+
+if(!fs.existsSync(path.join(__dirname,".\\mcfiles"))){
+fs.mkdirSync((path.join(__dirname,".\\mcfiles")));
+}
+if(!fs.existsSync(path.join(__dirname,".\\mcfiles\\.minecraft"))){
+
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\assets")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\configs")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\versions")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\libraries")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\saves")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\resourcepacks")));
+fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\logs")));
+};
+if(!fs.existsSync(path.join(__dirname,".\\serverfiles"))){
+fs.mkdirSync((path.join(__dirname,".\\serverfiles")));
+fs.mkdirSync((path.join(__dirname,".\\serverfiles\\versions")));
+fs.mkdirSync((path.join(__dirname,".\\serverfiles\\actives")));
+}
+</script>
+<script>
+String.prototype.replaceAll=function(a,b){
+	var c=this;
+	while(c.indexOf(a)!==-1)
+	{
+		c=c.replace(a,b);
+	}
+	return c;
+}
+
+</script>
+</head>
+<body style="background-image:url(background.jpg);background-size: cover;background-repeat:no-repeat;">
+<div class="cg">
+<input type="radio" name="ch" id="p1" onclick="$('.page1').hidden=false;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=true ;" checked/>
+<label for="p1">启动游戏</label>
+<input type="radio" name="ch" id="p2" onclick="$('.page1').hidden=true ;$('.page2').hidden=false;$('.page3').hidden=true ;$('.page4').hidden=true ;load_ver();" />
+<label for="p2">下载Minecraft</label>
+<input type="radio" name="ch" id="p3" onclick="$('.page1').hidden=true ;$('.page2').hidden=true ;$('.page3').hidden=false;$('.page4').hidden=true ;" />
+<label for="p3">设置</label>
+<input type="radio" name="ch" id="p4" onclick="$('.page1').hidden=true ;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=false;" />
+<label for="p4">服务器配置</label>
+</div>
+<div class="page1">
+<label class="normal">Version:</label>
+<select id="ver">
+<!--
+<option value="1.7.10">1.7.10</option>
+<option value="1.12.2">1.12.2</option>
+<option value="20w10a">20w10a</option>
+<option value="20wina">20w14infinite</option>
+-->
+</select><br />
+<label class="normal">Forge:</label><input type="checkbox" id="forge" onchange="$('#forgechoose').hidden=!this.checked;updated(ver_arr[$('#ver').selectedIndex]);"/><br />
+
+<div id="forgechoose" hidden>
+<select id="forgever">
+
+</select>
+</div>
+<label class="normal">Optifine:</label><input type="checkbox" id="optifine"/><br />
+<!--
+<label>64Bit:</label><input type="checkbox" id="bit" /><br />
+-->
+<label class="normal">Name:</label><input type="text" id="name" value="hello" /><br />
+
+<button onclick="runminecrafta(ver_arr[($('#ver').selectedIndex)])">运行Minecraft</button>
+<script>
+//https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
+window.down_d=function(num,debug){
+if(debug==undefined)var debug=false;
+
+window.download_window=window.open("services.html");
+download_window.ver_arr=window.ver_arr;
+download_window.url_arr=window.url_arr;
+download_window.d_num=num;
+download_window.debug_judge=debug;
+download_window.assets_root=assets_root;
+
+};
+window.onbeforeunload = function () {
+    //window.download_window.close();
+};
+setTimeout(function(){
+
+//".\.minecraft\versions\20w10a\20w10a-natives"
+console.log(0)
+const cp=require('child_process')
+const fs=require('fs')
+const http=require('http')
+const https=require('https')
+const path=require('path')
+const os=require('os')
+console.log(1);
+console.log(444);
+
+(function(){
+let ver=$("#ver");
+for (var s=0;s<ver_arr.length;s++){
+var o=document.createElement("option")
+o.value=ver_arr[s];
+o.innerHTML=ver_arr[s];
+ver.appendChild(o);
+}
+}
+)();
+function updated(versions_know){
+let aht=path.join(__dirname,".\\mcfiles\\.minecraft\\versions\\");
+let paths = fs.readdirSync(aht);
+let ver=$("#forgever");
+paths.forEach(function(patho){
+console.log(patho)
+    var _src=aht+'\\'+patho;
+    fs.stat(_src,function(err,stats){ //stats 该对象 包含文件属性
+      if(err)throw err;
+      if(stats.isDirectory()&&(patho.indexOf("Forge")>=0||patho.indexOf("forge")>=0)&&(patho.indexOf(versions_know)>=0)){
+		var o=document.createElement("option")
+		o.value=patho;
+		o.innerHTML=patho;
+		ver.appendChild(o);
+		console.log(patho)
+      }
+    });
+  });
+};
+window.updated=updated;
+window.force_ver=function(){
+let ver=$("#ver");
+for (var s=0;s<ver_arr.length;s++){
+var o=document.createElement("option")
+o.value=ver_arr[s];
+o.innerHTML=ver_arr[s];
+ver.appendChild(o);
+}
+};
+function unique(arr) {
+return Array.from(new Set(arr))
+}
+var x64=(os.arch().indexOf("64"))>0;
+let java_path=path.join(__dirname,".\\jre8-"+(x64?"64":"32"),"bin","javaw.exe");
+function runminecraft(num){
+console.log("Trying",num)
+let forgename;
+let forge=document.getElementById("forge").checked;;
+let optifine=document.getElementById("optifine").checked;
+let optifine_file;
+if(optifine)optifine_file=$('#optifinever').options[$('#optifinever').selectedIndex].value;
+if(forge)forgename=$('#forgever').options[$('#forgever').selectedIndex].value;
+let pprim=path.join(__dirname,".\\mcfiles\\.minecraft\\libraries\\");
+
+let username=document.getElementById("name").value;
+let djava_library=path.join(__dirname,`.\\mcfiles\\.minecraft\\versions\\${num}\\${num}-natives`);
+let forge_json;
+//let djava_library=path.join(__dirname,`.\\mcfiles\\natives`);
+//.\\jre8\\bin\\javaw.exe
+//C:\\ProgramData\\Oracle\\Java-PE\\jre1.8\\x64\\bin\\java.exe
+if(forge){
+djava_library=path.join(__dirname,`.\\mcfiles\\.minecraft\\versions\\${forgename}\\${forgename}-natives`);
+}
+let str=`"${java_path}" -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow  `+
+` -Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true  -Djava.library.path="${djava_library}" `;
+//alert(str)
+
+if(1){
+var obj;
+try{
+obj=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${num}/${num}.json`)));
+forge_json=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${forgename}/${forgename}.json`)));
+}catch(e){console.log(e);return;}
+var libraries=obj.libraries;
+console.log(libraries)
+window.libb=[];
+window.libbb=[];
+window.libbbb={};
+window.ver_obj=obj;
+window.forge_obj=forge_json;
+window.artifacts=0;
+let local_forge_lib=[];
+if(forge){
+for (let s=0;s<forge_json.libraries.length;s++){
+let name_arr=forge_json.libraries[s].name.split(":");
+local_forge_lib.push({name:forge_json.libraries[s].name,downloads:{artifact:{path:`${name_arr[0].split(".").join("/")}/${name_arr[1]}/${name_arr[2]}/${name_arr[1]}-${name_arr[2]}.jar`}}});
+}
+
+}
+
+libraries.unshift(...local_forge_lib);
+console.log(libraries)
+var ssssss="";
+console.log("Loading Libraries")
+for (var s=0;s<libraries.length;s++){
+var o=libraries[s];
+var u,p,pprim_slow;
+try{
+console.log(o.downloads.artifact.path)
+if(o.downloads.artifact){
+p=o.downloads.artifact.path;
+pprim_slow=path.join(pprim,p);
+artifacts++;
+}
+else if(o.downloads.classifiers){
+if(o.downloads.classifiers["natives-windows"]){
+p=o.downloads.classifiers["natives-windows"].path;
+pprim_slow=path.join(pprim,p);
+
+}
+
+else {
+//o.downloads.classifiers["natives-windows"]
+
+if(x64){
+p=o.downloads.classifiers["natives-windows-64"].path;
+}
+else{
+p=o.downloads.classifiers["natives-windows-32"].path;
+}
+pprim_slow=path.join(pprim,p);
+console.warn(pprim_slow)
+
+}
+
+}
+//stra.split(/[0-9]/)
+}
+catch(e){};
+
+
+var pprim_cmp=pprim_slow.split(/[0-9]/);
+var main_name_obj=libraries[s].name.split(":");
+var main_name_ver=main_name_obj[main_name_obj.length-1];
+var main_name=main_name_obj.slice(0,main_name_obj.length-1).join(":");
+console.log(pprim_cmp,main_name_obj,main_name_ver)
+if((!libbbb[main_name])){
+libb.push(pprim_cmp);
+libbb.push(pprim_slow)
+libbbb[main_name]=({name:main_name,ver:main_name_ver,index:(libb.length-1)});
+}
+else if(libbbb[main_name]){
+if(main_name_ver>libbbb[main_name].ver){
+libb.push(pprim_cmp);
+libbb.push(pprim_slow);
+libbbb[main_name]=({name:main_name,ver:main_name_ver,index:libbbb[main_name].index});
+libbb.splice(libbbb[main_name].index, 1);
+libb.splice(libbbb[main_name].index, 1);
+}
+}
+
+}
+//libbb=unique(libbb);
+ssssss=libbb.join(";");
+str=str.replace("obj.mainClass",``)
+var main_part=path.join(__dirname,`\\mcfiles\\.minecraft\\versions\\${num}\\${num}.jar`);
+var mainclass=(forge)?(forge_json.mainClass):(obj.mainClass);
+ssssss+=(`;${main_part}\" ${mainclass}`);
+ssssss+=" ";
+str+=(" -cp \""+ssssss);
+console.log(ssssss)
+var que="\"";
+if(!obj.minecraftArguments){
+obj.minecraftArguments="";
+for (var s=0;s<obj.arguments.game.length;s++){
+var c=obj.arguments.game[s];
+if(typeof obj.arguments.game[s]=="object"){
+
+continue;
+}
+obj.minecraftArguments+=obj.arguments.game[s];
+obj.minecraftArguments+=" ";
+}
+if(forge){
+for (var s=0;s<forge_json.arguments.game.length;s++){
+obj.minecraftArguments+=forge_json.arguments.game[s];
+obj.minecraftArguments+=" ";
+}
+}
+console.log(obj.minecraftArguments)
+}
+else{
+obj.minecraftArguments+=(" ");
+}
+var version_name=(forge)?(forgename):(obj.id);
+var minecraftArguments=obj.minecraftArguments
+.replace("${auth_player_name}",	que+username				 											+que)
+.replace("${version_name}",		que+version_name														+que)
+.replace("${version_type}",		que+launcher.name+launcher.version			 							+que)
+.replace("${game_directory}",	que+(path.join(__dirname,".\\mcfiles\\.minecraft"))			 			+que)
+.replace("${assets_root}",		que+(path.join(__dirname,".\\mcfiles\\.minecraft\\assets")) 			+que)
+.replace("${assets_index_name}",que+obj.id				 	 											+que)
+.replace("${auth_uuid}",		que+"02f3fcd468e1b0a8048e7575c68c4733"									+que)
+.replace("${auth_access_token}",que+"02f3fcd468e1b0a8048e7575c68c4733"									+que)
+.replace("${user_properties}",	que+"{}"+que)
+.replace("${user_type}",		que+"Legacy"+que)
+.replace("${launcher_name}",	que+launcher.name+que)
+.replace("${launcher_version}",	que+launcher.version+que)
+.replace("${classpath}",		"")
+str+=minecraftArguments;
+}
+//alert(str)
+
+if(forge)str+="--tweakClass cpw.mods.fml.common.launcher.FMLTweaker";
+console.log(str)
+try{
+var s=cp.execSync(str,{maxBuffer:2048*2048*2048*2048});
+if(s)console.info(s)
+}catch(e){
+console.info(e.toString())
+}
+return str;
+}
+
+
+
+
+console.log(666)
+console.log(runminecraft)
+window.runminecrafta=runminecraft;
+try{
+
+}catch(e){}
+
+
+
+},1000);
+</script>
+</div>
+<div class="page2" hidden>
+<h1>下载Minecraft：</h1>
+<div style='position:absolute;width:33%;height:33%;top:33%;left:33%;filter:alpha(Opacity=80);-moz-opacity:0.5;opacity: 0.5;' id="dialoga" hidden>
+<span>下载</span><span id="ver_set_span"></span><span style="display:inline-block;position:absolute;right:0;color:white;" onclick="this.parentNode.hidden=true;">&times;</span>
+<br />
+<div class="ver_set_div">
+&nbsp;&nbsp;&nbsp;客户端:
+<label class="checkbox">
+<input type="checkbox"  class="checkbox" id="client_download_confirm" />
+</label>
+</div>
+<div class="ver_set_div">
+&nbsp;&nbsp;&nbsp;服务端:
+<label class="checkbox">
+<input type="checkbox"  class="checkbox" id="server_download_confirm" onchange="$('#server_downloading').hidden=!$('#server_download_confirm').checked;" />
+</label>
+
+
+</div>
+<div style="display:block;display:flex;justify-content: center;align-items: center;">
+<progress id="server_downloading" min="0" max="100" hidden></progress>
+</div>
+
+
+<div class="ver_set_div">
+Optifine:
+<label class="checkbox">
+<input type="checkbox"  class="checkbox" />
+</label>
+</div>
+<div class="ver_set_div">
+&nbsp;&nbsp;&nbsp;&nbsp;Forge:
+<label class="checkbox">
+<input type="checkbox"  class="checkbox" onclick="this.checked&&forge_tip();$('#forge_download_fetch').hidden=!this.checked;$('#forge_downloading').hidden=!this.checked" checked="false" id="forge_checked_choose_download" />
+</label>
+</div>
+<div style="display:block;display:flex;justify-content: center;align-items: center;" >
+<select id="forge_download_fetch" hidden>
+
+</select>
+<progress id="forge_downloading" min="0" max="100" hidden></progress>
+<script>
+$('#forge_checked_choose_download').checked="";
+
+function forge_tip(){
+let mirror_url=localStorage["api"]=="bmcl"?"https://bmclapi2.bangbang93.com":"https://download.mcbbs.net"
+let set=[];
+let forge_download_ver=$("#forge_download_fetch")
+fetch(mirror_url+"/forge/minecraft/"+ver_arr[window["dlg_ver"]]).then(res=>res.json()).then(function(obj){
+console.log(obj)
+for (let s=0;s<obj.length;s++){
+var o=document.createElement("option")
+o.value=obj[s].version;
+o.innerHTML=obj[s].version;
+o["dataset"].url=`${mirror_url}/forge/download?mcversion=${obj[s].mcversion}&version=${obj[s].version}&category=installer&format=jar`;
+o["dataset"].ver=obj[s].version;
+o["dataset"].mcver=obj[s].mcversion;
+//https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
+forge_download_ver.appendChild(o);
+}
+
+});
+};
+</script>
+</div>
+<button style="text-align:center;width:20%;border-radius:10px;" id="rsdownload">开始下载</button>
+</div>
+
+<style>
+.ver_set_div
+{
+/* flex使其水平垂直居中的方法：必须在父容器设置，且必须是100vh*/
+display:flex;
+justify-content: center;
+align-items: center;
+}
+label.checkbox{
+	width: 50px;
+	height: 25px;
+	border-radius: 12px;
+	background-color: gainsboro;
+	position: relative;
+	overflow: hidden;
+	/*去除在before里面溢出的部分*/
+}
+label.checkbox input.checkbox::after{
+content: "";
+visibility: visible;
+width: 20px;
+height: 20px;
+border-radius: 100%;
+background-color: white;
+position: absolute;
+left: 2px;
+top: 2px;
+transition: all 0.2s;
+}
+label.checkbox input.checkbox{
+   			visibility: hidden;
+   			/*隐藏多选框*/
+   		}
+label.checkbox input.checkbox::before{
+   	content: "";
+   	visibility: visible;
+   	width: 100%;
+   	height: 100%;
+   	position: absolute;
+   	top: 0;
+   	left: 0;
+   	transition: all 0.2s;
+}
+label.checkbox input.checkbox:checked::before{
+   	background-color: green;//改变背景色
+}
+label.checkbox input.checkbox:checked::after{
+   	transform: translateX(25px);
+}
+
+#server_downloading:before{display:block;}
+.process{
+background:red;
+position:absolute;
+z-index:100;
+width:300px;
+height:10px;
+}
+#links{
+width:100%;
+height:500px;
+z-index:100;
+overflow:scroll;
+}
+label.normal{
+width:100px;
+display:inline-block;
+}
+label.width2{
+width:150px;
+display:inline-block;
+}
+</style>
+<div class="process" hidden>
+<process value="0" max="100" style="width:100px;display:none;"></process>
+</div>
+<input type="text" id="query_ver" />
+<button onclick="let opq={mcbbs:2,mojang:1,bmcl:0,local:1};download_json(opq[localStorage['api']]);location.reload();">更新文件</button><br />
+<div style="color:white" id="versionlist">
+
+<script>
+window.global_error=[];
+process.on('uncaughtException', function (err) {
+global_error.push(err)
+    console.log(err);//直接捕获method()未定义函数，Node进程未被退出。
+	return false;
+});
+$("#query_ver").onchange=function(){
+(function(){
+		var that=$("#query_ver");
+		var active;
+		if(that.value)active=true;
+		for (var s=0;s<ver_arr.length;s++){
+		if(!active){ver_down.children[s].hidden=false;continue;}
+		if(ver_down.children[s].tagName.toLowerCase()=="br"){ver_down.children[s].hidden=false;continue;}
+		if(ver_down.children[s].innerHTML.indexOf(that.value)>=0){
+		ver_down.children[s].hidden=false;
+		}
+		else
+		ver_down.children[s].hidden=true;
+		}
+		})();
+};
+setTimeout(function(){
+const fs=require('fs');
+const https=require('https')
+const path=require('path')
+const os=require('os')
+const dirs=require("./lib/dirs/index")
+window.d_lib_list={};
+window.load_ver=function(){
+		(function(){
+		window.ver_down=$("#links");
+		if(ver_down.loada==true)return;
+		else ver_down.loada=true;
+		
+		for (var s=0;s<ver_arr.length;s++){
+		setTimeout(function(ss){
+		var oo=document.createElement("p");
+		var o=document.createElement("a");
+		o.href="#"+ss;
+		o.onclick=new Function(`$("#dialoga").hidden=false;$("#ver_set_span").innerHTML=ver_arr[${ss}];$("#rsdownload").onclick=function(){if($("#client_download_confirm").checked)down_d(${ss});if($("#server_download_confirm").checked)download_server(${ss});if($("#forge_checked_choose_download").checked)download_forge();};window.dlg_ver=${ss};`);
+		o.innerHTML=ver_arr[ss];
+		oo.appendChild(o);
+		oo.style.margin=0;
+		
+		ver_down.appendChild(oo);
+		
+		if(ver_arr[ss]=="20w10a")console.log(o)
+		},1*s,s);
+		}
+		})();
+};
+function copy_natives(obj){
+try{
+dirs.copy_dirs(path.join(__dirname,"./mcfiles/natives"),path.join(__dirname,`./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`));
+}catch(e){
+console.log(e);
+copy_natives(obj);
+}
+
+}
+function push_log(logs){
+window.download_log=$("#logs");
+download_log.innerHTML+=(logs);
+}
+	//load_ver();
+window.download_json=function(num,urls){
+//http://hostker.bmclapi.933.moe:4000/download/ebf4db522bbf78b88253d045955675c7?name=version_manifest.json
+//https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+/*
+https://launchermeta.mojang.com/mc/game/version_manifest.json
+https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+https://download.mcbbs.net/mc/game/version_manifest.json
+*/
+let url_list=["https://bmclapi2.bangbang93.com/mc/game/version_manifest.json",
+"https://launchermeta.mojang.com/mc/game/version_manifest.json",
+"ps://download.mcbbs.net/mc/game/version_manifest.json"];
+urls=urls?urls:url_list[num];
+(fetch(urls).then(vu=>vu.json()).then( function(objs){console.log(objs);fs.writeFileSync(path.join(__dirname,"./mcfiles/mojang_versions.json"),JSON.stringify(objs));}));
+
+}
+},1000);
+</script>
+<div id="links">
+<!--
+<a href="#0" onclick="d(0);">1.6.4</a><br />
+<a href="#1" onclick="d(1);">1.7.2</a><br />
+<a href="#2" onclick="d(2);">1.7.4</a><br />
+<a href="#3" onclick="d(3);">1.7.5</a><br />
+<a href="#4" onclick="d(4);">1.7.6</a><br />
+<a href="#5" onclick="d(5);">1.7.7</a><br />
+<a href="#6" onclick="d(6);">1.7.8</a><br />
+<a href="#7" onclick="d(7);">1.7.9</a><br />
+<a href="#8" onclick="global.d(8);">1.7.10</a>
+-->
+</div>
+<div id="logs"></div>
+</div>
+</div>
+<div class="page3" hidden>
+<h1>设置</h1>
+<label>版本查找：</label>
+<style>
+input[id*=custom]{width:50%;}
+#customsetting{wudth:100%;}
+</style>
+<input type="radio" name="ver" id="ver1" onclick="if(confirm('是否设置镜像源为本地？')){localStorage['api']='local';location.reload();}" /><label for="ver1">本地</label>
+<input type="radio" name="ver" id="ver2" onclick="if(confirm('是否设置镜像源为官方？')){localStorage['api']='mojang';location.reload();}" /><label for="ver2">官方镜像</label>
+<input type="radio" name="ver" id="ver3" onclick="if(confirm('是否设置镜像源为BMCL？')){localStorage['api']='bmcl';location.reload();}" /><label for="ver3">BMCL镜像</label>
+<input type="radio" name="ver" id="ver4" onclick="if(confirm('是否设置镜像源为MCBBS？')){localStorage['api']='mcbbs';location.reload();}" /><label for="ver4">MCBBS镜像(推荐)</label>
+<input type="radio" name="ver" id="ver5" onclick="if(confirm('是否设置镜像源为自定义？')){localStorage['api']='custom';$('#customsetting').hidden=false;}" /><label for="ver4">自定义下载源</label>
+<div id="customsetting" hidden>
+自定义设置：<br />
+<span style="width:5%;display:inline-block;">Assets:</span><input type="text" id="custom_assets" onchange="localStorage['custom_assets']=this.value;" />
+<br />
+<span style="width:5%;display:inline-block;">LIBRARIES:</span><input type="text" id="custom_libraries" onchange="localStorage['libraries']=this.value;" />
+<br />
+<span style="width:5%;display:inline-block;">Files:</span><input type="text" id="custom_files" onchange="localStorage['files']=this.value;" />
+<br />
+<span style="width:5%;display:inline-block;">Main:</span><input type="text" id="custom_main" onchange="localStorage['main']=this.value;" />
+<br />
+<span style="width:5%;display:inline-block;">JSON:</span><input type="text" id="custom_json" onchange="localStorage['json']=this.value;" />
+</div>
+<br />
+下载等待时间(ms):<input type="text" id="custom_wait" onchange="localStorage['wait']=this.value;" />
+<br />
+多线程数量(0为无限制)：<input type="text" id="multi_count" onchange="localStorage['multi_count']=this.value;" />
+<br />
+<a onclick="window.download_json(1);" href="#">下载官方镜像JSON</a>
+<a onclick="window.download_json(0);" href="#">下载BMCL镜像JSON</a>
+<a onclick="force_ver();" href="#">强制加载版本</a>
+<a onclick="r();" href="#">重新加载网页</a>
+</div>
+<div class="page4" hidden>
+<button onclick="create_new_server();">新建服务器</button>
+<div style='position:absolute;width:33%;height:33%;top:33%;left:33%;filter:alpha(Opacity=80);-moz-opacity:0.5;opacity: 0.5;' id="dialogb" hidden>
+<span>新建服务器</span>
+<span style="display:inline-block;position:absolute;right:0;color:white;" onclick="this.parentNode.hidden=true;">&times;</span><br />
+选择模板文件夹：<br />
+<label class="width2">配置文件名称：</label><input type="text" id="server_add_id" /><br />
+<label class="width2">从外部选择:</label><input id="server_build_out" type="file" nwdirectory hidden /><button onclick="$('#server_build_out').click();window.server_new_choise=1;">点此选择</button><br />
+<label class="width2">从模板库选择:</label><select id="server_build_in"></select><br />
+<button onclick="server_choised()">创建服务器</button>
+</div>
+</div>
+<script src="./main-thread.js"></script>
+<script>
+function create_new_server(){
+$("#dialogb").hidden=false;
+$("#server_build_out").nwworkingdir=path.join(__dirname,"serverfiles");
+}
+function server_choised(){
+if(!$("#server_add_id").value){
+alert("必须设置配置文件名称");
+return false;
+}
+if(window["server_new_choise"]==1){
+const dirs=require("./lib/dirs/index.js");
+dirs.mkdirsSync(path.join(__dirname,"serverfiles","actives",$("#server_add_id").value));
+dirs.copy_dirs($("#server_build_out").files[0].path,path.join(__dirname,"serverfiles","actives",$("#server_add_id").value));
+try{
+let json=JSON.parse(fs.readFileSync(path.join(__dirname,"serverfiles","actives",$("#server_add_id").value,"manifest.json")));
+json.name=$("#server_add_id").value;
+console.log(json)
+fs.writeFileSync(path.join(__dirname,"serverfiles","actives",$("#server_add_id").value,"manifest.json"),JSON.stringify(json))
+}catch(e){
+
+}
+};
+}
+setTimeout(function(){
+let versss={
+local:function(){$("#ver1").checked=true;},
+mojang:function(){$("#ver2").checked=true;},
+bmcl:function(){$("#ver3").checked=true;},
+mcbbs:function(){$("#ver4").checked=true;},
+custom:function(){$("#ver5").checked=true;$('#customsetting').hidden=false;}
+};
+versss[ localStorage['api'] ]();
+$("#custom_assets").value=localStorage['custom_assets'];
+$("#custom_libraries").value=localStorage['libraries'];
+$("#custom_files").value=localStorage['files'];
+$("#custom_main").value=localStorage['main'];
+$("#custom_json").value=localStorage['json'];
+$("#custom_wait").value=localStorage['wait']?localStorage['wait']:60000;
+$("#multi_count").value=localStorage['multi_count']?localStorage['multi_count']:20;
+});
+
+</script>
+<script src="vcon.js"></script>
+    <script>
+		if(process.versions["nw-flavor"]=="normal")
+        // init vConsole
+        var vConsole = new VConsole();
+        console.log('Hello world');
+		console.log(HTMLProgressElement);
+    </script>
+</body>
+</html>

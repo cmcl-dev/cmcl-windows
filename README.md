@@ -1,4 +1,4 @@
-# CMCL-Windows
+# CMCL-Windows ![Version](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fraw.githubusercontent.com%2FCMCL-Developing%2FCMCL-Windows%2Fmain%2Fpackage.json)
 ## Introduction
 >This is a wonderful Minecraft Launcher called Convenient Minecraft Launcher.  
 >We supported the Minecraft version which is higher than 1.7.10(Contain!)  

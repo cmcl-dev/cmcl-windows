@@ -5,9 +5,10 @@ const streamToPromise = require('promising-a-stream');
 const dirs=require("./lib/dirs/index");
 const compressing=require("compressing");
 const path=require("path")
+
 async function download_multi(u,p,async_f,cb,retry,ps){
 if(!retry)retry=0;
-
+const fs=require("fs")
 
 //下载 的文件 地址
 let fileURL = u;
@@ -73,6 +74,7 @@ nfetch(fileURL, {
 return async_f?(streamToPromise(fileStream,"finish")):(true);
 };
 let lib=async function(u,p,size){
+const fs=require("fs")
 let failed=false;
 if(u.indexOf("lwjgl")>=0){
 console.info(`lib("${u}","${p}");`)
@@ -107,6 +109,7 @@ return download_multi(u,path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}
 
 
 function download_server(ver){
+const fs=require("fs")
 	fetch(url_arr[ver]).then(text=>text.json()).then(function(json){
 		let server_url=json.downloads.server.url;
 		try{
@@ -122,6 +125,7 @@ function download_server(ver){
 	});
 }
 function download_forge(){
+const fs=require("fs")
 	let forge_ver=$("#forge_download_fetch").selectedOptions[0].value;
 	let forge_mc_ver=$("#forge_download_fetch").selectedOptions[0].dataset["mcver"];
 	let forge_url=$("#forge_download_fetch").selectedOptions[0].dataset["url"];
@@ -140,21 +144,24 @@ function download_forge(){
 	for (let s=0;s<libraries.length;s++){
 		let name_arr=libraries[s].name.split(":");
 		let n=`${name_arr[0].split(".").join("/")}/${name_arr[1]}/${name_arr[2]}/${name_arr[1]}-${name_arr[2]}.jar`;
-		let u=`https://libraries.minecraft.net`+n;
+		let u=`https://download.mcbbs.net/maven/`+n;
 		downloading_context.push(lib(u,n,0));
 	}
-	let collect=await Promise.all(downloading_context);
+	let collect=Promise.all(downloading_context);
 	console.log(collect)
+	await collect;
 	},false,
 	function(cgh){
 	$("#forge_downloading").value=cgh*0.5;
 	});
 }
 function re_download_libraries(obj){
+const fs=require("fs")
 	console.log(obj["download_progress"])
 download_multi(obj["dataset"]["url"],path.join(__dirname,`./mcfiles/.minecraft/libraries/${obj["dataset"]["path"]}`),true,async function(){obj["download_progress"].value=100;if(obj["dataset"]["path"].indexOf("natives")!==-1)await jar_natives(path.join(__dirname,`./mcfiles/.minecraft/versions/${ver_arr[d_num]}/${ver_arr[d_num]}-natives`),[path.join(__dirname,`./mcfiles/.minecraft/libraries/${obj["dataset"]["path"]}`)]);setTimeout(function(){obj.parentNode.parentNode.hidden=true;},1000);},function(cgh){obj["download_progress"].value=cgh;});
 }
 function re_download_assets(obj){
+	const fs=require("fs")
 	console.log(obj["download_progress"])
-download_multi(obj["dataset"]["url"],path.join(__dirname,`./mcfiles/.minecraft/assets/objects/${obj["dataset"]["hash"].slice(0,2)}/${obj["dataset"]["hash"]}`),true,async function(){obj["download_progress"].value=100;},function(cgh){obj["download_progress"].value=cgh;});
+download_multi(obj["dataset"]["url"],path.join(__dirname,`./mcfiles/.minecraft/assets/objects/${obj["dataset"]["hash"].slice(0,2)}/${obj["dataset"]["hash"]}`),true,async function(){obj["download_progress"].value=100;setTimeout(function(){obj.parentNode.parentNode.hidden=true;},1000);},function(cgh){obj["download_progress"].value=cgh;});
 }

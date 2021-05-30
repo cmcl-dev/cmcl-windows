@@ -10,7 +10,10 @@ const dirs=require("./lib/dirs/index")
 const compressing=require("compressing")
 const nfetch = require('node-fetch');
 const __dirname=process.cwd();
+const rule_parsing=require("./rule.js")
+const x64=JSON.parse(require("child_process").execSync("sysbit.exe")).bit=="64";
 let global_error=[];
+let __minecraft=path.join(__dirname,"./mcfiles/.minecraft");
 let window={};
 let functions={};
 let fall_download_libraries=[];
@@ -34,6 +37,13 @@ download_log.innerHTML+=(logs);
 */
 postMessage(JSON.stringify({type:"log",value:logs}));
 }
+function push_interval(s=20){
+/*
+window.download_log=$("#logs");
+download_log.innerHTML+=(logs);
+*/
+postMessage(JSON.stringify({type:"interval",value:s}));
+}
 function push_failed(type,xo,yo,zo){
 /*
 window.download_log=$("#logs");
@@ -44,9 +54,198 @@ postMessage(JSON.stringify({type:type,value:{x:xo,y:yo,z:zo}}));
 const progressStream = require('progress-stream');
 //const streamToPromise = require('stream-to-promise');
 const streamToPromise = require('promising-a-stream');
-async function download_multi(u,p,async_f,cb,ac_cb,failed_cb){
-if(fs.existsSync(p))return true;
+const crypto = require('crypto');
+async function gen_sha1(path){
+	return new Promise(function(resolve,reject){
+    
 
+    var md5sum = crypto.createHash('sha1');
+    var stream = fs.createReadStream(path);
+    stream.on('data', function(chunk) {
+        md5sum.update(chunk);
+    });
+    stream.on('end', function() {
+        let str = md5sum.digest('hex').toLowerCase();
+		console.log("sha1:"+str)
+		resolve(str)
+    });
+});
+}
+
+
+async function download_multi_p(_hash,u,p,async_f,cb,ac_cb,failed_cb){
+if(fs.existsSync(p)){
+	if(await gen_sha1(p)==_hash)
+	return true;
+}
+else
+return new Promise(function(_resolve,_reject){
+	
+//下载 的文件 地址
+let fileURL = u;
+//下载保存的文件路径
+let fileSavePath = p;
+//缓存文件路径
+let tmpFileSavePath = fileSavePath + ".tmp";
+//下载进度信息保存文件
+let cfgFileSavePath = fileSavePath + ".cfg.json";
+
+let downCfg = {
+    rh: {},//请求头
+    percentage: 0,//进度
+    transferred: 0,//已完成
+    length: 0,//文件大小
+    remaining: 0,//剩余
+    first: true//首次下载
+};
+let tmpFileStat = { size: 0 };
+//判断文件缓存 与 进度信息文件是否存在 
+if (fs.existsSync(tmpFileSavePath) && fs.existsSync(cfgFileSavePath)) {
+    tmpFileStat = fs.statSync(tmpFileSavePath);
+    downCfg = JSON.parse(fs.readFileSync(cfgFileSavePath, 'utf-8').trim());
+    downCfg.first = false;
+    //设置文件
+    downCfg.transferred = tmpFileStat.size;
+}
+
+//创建写入流
+let writeStream = null;
+
+//请求头
+let fetchHeaders = {
+    'Content-Type': 'application/octet-stream',
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    Pragma: "no-cache",
+};
+//追加请求范围
+if (downCfg.length != 0) {
+    fetchHeaders.Range = "bytes=" + downCfg.transferred + "-" + downCfg.length;//71777113
+}
+if (downCfg.rh["last-modified"]) {
+    fetchHeaders["last-modified"] = downCfg.rh["last-modified"];
+}
+//校验文件头
+const checkHerder = [
+    "last-modified",//文件最后修改时间
+    "server",//服务器
+    // "content-length",//文件大小
+    "content-type",//返回类型
+    "etag",//文件标识
+];
+console.log(fileURL)
+nfetch(fileURL, {
+    method: 'GET',
+    headers: fetchHeaders,
+    // timeout: 100,    
+}).then(res => {
+    let h = {};
+    res.headers.forEach(function (v, i, a) { h[i.toLowerCase()] = v; });
+    // console.log(h);
+    //文件是否发生变化
+    let fileIsChange = false;
+    //是否首次下载
+    if (downCfg.first) {
+        //记录相关信息
+        for (let k of checkHerder) downCfg.rh[k] = h[k];
+        downCfg.length = h["content-length"];
+    } else {
+        //比较响应变化
+        for (let k of checkHerder) {
+            if (downCfg.rh[k] != h[k]) {
+                fileIsChange = true;
+                break;
+            }
+        }
+        //是否运行范围下载
+        downCfg.range = res.headers.get("content-range") ? true : false;
+    }
+    //创建文件写入流
+    writeStream = fs.createWriteStream(tmpFileSavePath, { 'flags': !downCfg.range || fileIsChange ? 'w' : 'a' })
+        .on('error', function (e) {
+            console.error('error==>', e)
+			console.warn(e);
+			if(failed_cb)failed_cb(e);
+				_resolve(false);
+        }).on('ready', function () {
+            console.log("开始下载:", fileURL);
+        }).on('finish', function () {
+            //下载完成后重命名文件
+			try{
+			fs.renameSync(tmpFileSavePath, fileSavePath);
+            fs.unlinkSync(cfgFileSavePath);	
+			}catch(e){
+				console.warn(e);
+				failed_cb(e);
+				_resolve(false);
+				return ;
+			}
+            
+            console.log('文件下载完成:', fileSavePath);
+			if(cb)cb(100);
+			if(ac_cb)ac_cb(true);
+			_resolve(true);
+			finish_list.push(u);
+        });
+
+    //写入信息文件
+    fs.writeFileSync(cfgFileSavePath, JSON.stringify(downCfg));
+    //获取请求头中的文件大小数据
+    let fsize = h["content-length"];
+    //创建进度
+    let str = progressStream({
+        length: fsize,
+        time: 400 /* ms */
+    });
+    //创建进度对象
+    str.on('progress', function (progressData) {
+        //不换行输出
+        let percentage = Math.round(progressData.percentage) + '%';
+        console.log(fileURL+":"+percentage);
+		if(cb)cb(progressData.percentage);
+        //     console.log(`
+        //     进度 ${progressData.percentage}
+        //     已完成 ${progressData.transferred}
+        //     文件大小 ${progressData.length}
+        //     剩余 ${progressData.remaining}
+        //         ${progressData.eta}
+        //     运行时 ${progressData.runtime}
+        //         ${ progressData.delta}
+        //    速度 ${ progressData.speed}
+        //             `);
+        // console.log(progress);
+        /*
+        {
+            percentage: 9.05,
+            transferred: 949624,
+            length: 10485760,
+            remaining: 9536136,
+            eta: 42,
+            runtime: 3,
+            delta: 295396,
+            speed: 949624
+        }
+        */
+    });
+    res.body.pipe(str).pipe(writeStream);
+    res.headers.forEach(function (v, i, a) {
+        console.log(i + " : " + v);
+    })
+}).catch(e => {
+    //自定义异常处理
+    console.warn(e);
+	failed_cb(e);
+	resolve(false);
+	return false;
+});
+});
+}
+
+async function download_multi(_hash,u,p,async_f,cb,ac_cb,failed_cb){
+if(fs.existsSync(p)){
+	if(await gen_sha1(p)==_hash)
+	return true;
+}
 
 //下载 的文件 地址
 let fileURL = u;
@@ -67,7 +266,9 @@ const fileStream = fs.createWriteStream(tmpFileSavePath).on('error', function (e
 	try{
 		fs.renameSync(tmpFileSavePath, fileSavePath);
 	}catch(e){
-		console.log(e);
+		console.warn(e);
+		failed_cb(e);
+		return ;
 	}
     
     console.log('文件下载完成:', fileSavePath);
@@ -86,7 +287,7 @@ nfetch(fileURL, {
     //创建进度
     let str = progressStream({
         length: fsize,
-        time: 100 /* ms */
+        time: 300 /* ms */
     });
     // 下载进度 
     str.on('progress', function (progressData) {
@@ -132,16 +333,6 @@ async function wait_tick(){
 		setTimeout(ok,10);
 	});
 }
-function copy_natives(obj){
-try{
-	dirs.mkdirsSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`));
-dirs.copy_dirs(path.join(__dirname,"./mcfiles/natives"),path.join(__dirname,`./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`));
-}catch(e){
-console.log(e);
-copy_natives(obj);
-}
-
-}
 window.$=function(cd){return document.querySelector(cd);}
 try{
 exports.ccc=1;
@@ -157,7 +348,8 @@ console.log(err);
 });
 let https_agent=new https.Agent({timeout:(localStorage['wait']?Number(localStorage['wait']):(1000*60))});
 let  http_agent=new http .Agent({timeout:(localStorage['wait']?Number(localStorage['wait']):(1000*60))});
-let lib=async function(u,p,size){
+let lib=async function(_hash,u,p,size){
+console.log(_hash)
 let failed=false;
 if(u.indexOf("lwjgl")>=0){
 console.info(`lib("${u}","${p}");`)
@@ -176,15 +368,28 @@ console.warn("U:"+u+"\nP:"+p);
 push_log(`Loading Libraries:${p}<br />`);
 d_lib_list[u]=1;
 (ar_s)++;
-if(fs.existsSync(path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`))){
-push_log(`ALREADY Downloaded ${p} Module<br />`);
-c++;
-d_lib_list[u]=0;
-return;
+
+if(fs.existsSync(path.join(__minecraft,`./libraries/${p}`))){
+	console.log(_hash)
+	if(_hash)
+	if((await gen_sha1(path.join(__minecraft,`./libraries/${p}`)))==_hash){
+		push_log(`ALREADY Downloaded ${p} Module<br />`);
+		LIb++;
+		d_lib_list[u]=0;
+		processs=started_lib_run+LIb/(pleasure.length)*20;
+		part_process=LIb/(pleasure.length)*100;
+		global_resource[u]=2;
+		console.log("OAO")
+		return true;
+	}
+	else{
+		console.log(await gen_sha1(path.join(__minecraft,`./libraries/${p}`)),_hash)
+	}
+	
 }
 console.log(`./mcfiles/.minecraft/libraries/${p}`)
 try{
-dirs.mkdirsSync(path.dirname(path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`)));
+dirs.mkdirsSync(path.dirname(path.join(__minecraft,`./libraries/${p}`)));
 }catch(e){
 console.log(e)
 }
@@ -244,7 +449,8 @@ let return_v=new Promise(async function(ok,fall){
 	ok();
 });
 */
-return download_multi(u,path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`),true,function(prog){},function(prog){
+push_interval()
+return download_multi_p(_hash,u,path.join(__minecraft,`./libraries/${p}`),true,function(prog){},function(prog){
 	
 if(prog){
 LIb++;
@@ -259,7 +465,7 @@ global_resource[u]=2;
 };
 
 
-let main_url=async function(u,v,size){
+let main_url=async function(_hash,u,v,size){
 if(localStorage["api"]=="bmcl"){
 u=u.replace("https://launcher.mojang.com","https://bmclapi2.bangbang93.com");
 }
@@ -269,7 +475,7 @@ u=u.replace("https://launcher.mojang.com","https://download.mcbbs.net");
 if(localStorage["api"]=="custom"){
 u=u.replace("https://launcher.mojang.com",localStorage["main"]);
 }
-let p=path.join(__dirname,`./mcfiles/.minecraft/versions/${v}/${v}.jar`);
+let p=path.join(__minecraft,`./versions/${v}/${v}.jar`);
 dirs.mkdirsSync(path.dirname(p))
 /*
 console.log("inside main_url",u)
@@ -322,19 +528,20 @@ while(1){
 part_process=0;
 return Promise.resolve("OK");
 */
-return download_multi(u,p,true,function(sz){part_process=(sz),processs=(10+40*sz/100);},function(){},false);
+return download_multi_p(_hash,u,p,true,function(sz){part_process=(sz),processs=(10+40*sz/100);},function(){},false);
 
 };
 functions.main_url=main_url;
 let download_asset=async function(f,hash,size,cb){
 let u=assets_root+"/"+f+"/"+hash;
-let p=path.join(__dirname,`./mcfiles/.minecraft/assets/objects/${f}/${hash}`);
-if(fs.existsSync(p)==true){
-var info2=fs.statSync(p);
-if(size==info2.size){
-console.log("already downloaded");
-return true;
-}
+let p=path.join(__minecraft,`./assets/objects/${f}/${hash}`);
+if(fs.existsSync(p)){
+	if(await gen_sha1(p)==hash){
+		console.log("already downloaded");
+		cb(100);
+		return true;
+	}
+	
 }
 
 console.warn("Asset Start:\n"+hash);
@@ -366,7 +573,19 @@ while(1){
 for (var s=0;s<10000;s++)await wait_tick(); 
 });
 */
-return Promise.race([new Promise(function(resolve,reject){setTimeout(resolve,60000,"超时");}),download_multi(u,p,true,function(){},function(){cb(hash)},function(){if(global_resource[hash]==1)push_failed("failed_assets",hash,`./minecraft/assets/objects/${f}/${hash}`);})]);
+return Promise.race([new Promise(function(resolve,reject){
+	setTimeout(resolve,30000,"超时");
+	push_interval();
+	}),
+	new Promise(function(resolve,reject){
+		download_multi_p(hash,u,p,true,
+		function(){},
+		function(){cb(hash);resolve()},
+		function(){
+		if(global_resource[hash]==1){
+		push_failed("failed_assets",hash,`./minecraft/assets/objects/${f}/${hash}`,u);resolve();}})})
+		]
+	);
 };
 functions.download_asset=download_asset;
 //download_assets("https://launchermeta.mojang.com/v1/packages/e022240e3d70866f41dd88a3b342cf842a7b31bd/1.17.json","1.17")
@@ -376,7 +595,7 @@ let assets_finish=async function(v){
 	await wait_tick();
 	var obj;
 	try{
-	obj=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/assets/indexes/${v}.json`)));
+	obj=JSON.parse(fs.readFileSync(path.join(__minecraft,`./assets/indexes/${v}.json`)));
 	}catch(e){
 		await wait_tick();
 		await assets_finish(v);
@@ -402,7 +621,7 @@ await download_asset(f,hash_s)
 		console.log(`./mcfiles/.minecraft/assets/objects/${f}`)
 		//dirs.mkdirsSync(path.join(__dirname,`./mcfiles/.minecraft/assets/objects/${f}`))
 		try{
-			dirs.mkdirsSync(path.join(__dirname,`./mcfiles/.minecraft/assets/objects/${f}`))
+			dirs.mkdirsSync(path.join(__minecraft,`./assets/objects/${f}`))
 		}catch(e){
 			console.warn(e)
 		}
@@ -458,7 +677,7 @@ u=u.replace("https://launchermeta.mojang.com",localStorage["assets"]);
 }
 window.asset=0;
 var curagent=u.indexOf("https")==0?https_agent:http_agent;
-let jvp=path.join(__dirname,`./mcfiles/.minecraft/assets/indexes/${v}.json`);
+let jvp=path.join(__minecraft,`./assets/indexes/${v}.json`);
 try{
 dirs.mkdirsSync(path.dirname(jvp))
 }catch(e){console.log(e);}
@@ -498,7 +717,7 @@ let get_json=async function(curagent,url,target,self_s,num,size){
     cache: 'no-cache',
 	})
 	.then(function(res){return res.text();}));
-	fs.writeFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${ver_arr[num]}/${ver_arr[num]}.json`),data_json);
+	fs.writeFileSync(path.join(__minecraft,`./versions/${ver_arr[num]}/${ver_arr[num]}.json`),data_json);
 	return true;
 }
 
@@ -506,14 +725,14 @@ let d=async function(num){
 
 console.log("Started:"+ver_arr[num]);
 //var forge=document.getElementById("forge_d").checked;
-console.log((path.join(__dirname,`./mcfiles/.minecraft/versions/${ver_arr[num]}`)));
-dirs.mkdirsSync((path.join(__dirname,`./mcfiles/.minecraft/versions/${ver_arr[num]}`)));
+console.log((path.join(__minecraft,`.//versions/${ver_arr[num]}`)));
+dirs.mkdirsSync((path.join(__minecraft,`.//versions/${ver_arr[num]}`)));
 window.c=0;
 var curagent=url_arr[num].indexOf("https")==0?https_agent:http_agent;
 if(localStorage["api"]=="bmcl")url_arr[num]=url_arr[num].replace("https://launchermeta.mojang.com","https://bmclapi2.bangbang93.com");
 if(localStorage["api"]=="mcbbs")url_arr[num]=url_arr[num].replace("https://launchermeta.mojang.com","https://download.mcbbs.net");
 if(localStorage["api"]=="custom")url_arr[num]=url_arr[num].replace("https://launchermeta.mojang.com",localStorage["json"]);
-await get_json(curagent,url_arr[num],`./mcfiles/.minecraft/versions/${ver_arr[num]}/${ver_arr[num]}.json`,d,num);
+await get_json(curagent,url_arr[num],path.join(__minecraft,`./versions/${ver_arr[num]}/${ver_arr[num]}.json`),d,num);
 await wait_tick();
 processs+=(10);
 //debugger;
@@ -522,7 +741,7 @@ let obj;
 while(1){
 await wait_tick();
 try{
-	obj=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${ver_arr[num]}/${ver_arr[num]}.json`)));
+	obj=JSON.parse(fs.readFileSync(path.join(__minecraft,`./versions/${ver_arr[num]}/${ver_arr[num]}.json`)));
 }catch(e){console.log(e);continue;}
 break;
 }
@@ -532,7 +751,7 @@ if(localStorage["api"]=="bmcl")url_arr[num]=url_arr[num].replace("https://launch
 if(localStorage["api"]=="mcbbs")url_arr[num]=url_arr[num].replace("https://launchermeta.mojang.com","https://download.mcbbs.net");
 if(localStorage["api"]=="custom")url_arr[num]=url_arr[num].replace("https://launcher.mojang.com",localStorage["files"]);
 console.info("Client:"+downloads.client.url);
-await main_url(downloads.client.url,obj.id,downloads.client.size);
+await main_url(downloads.client.sha1,downloads.client.url,obj.id,downloads.client.size);
 processs=(50);
 started_lib_run=processs;
 var libraries=obj.libraries;
@@ -577,11 +796,13 @@ if(o.downloads.artifact){
 u=o.downloads.artifact.url;
 p=o.downloads.artifact.path;
 size_s=o.downloads.artifact.size;
+//console.warn(o.downloads.artifact)
 if(libss.indexOf(u)==-1){
 console.log(u);
 global_resource[u]=1;
 //await lib(u,p,size_s);
-pleasure.push(lib(u,p,size_s));
+console.warn(o.downloads.artifact)
+pleasure.push(lib(o.downloads.artifact.sha1,u,p,size_s));
 libss.push(u);
 global_resource[u]=1;
 }
@@ -597,16 +818,16 @@ console.log(u);
 global_resource[u]=1;
 try{
 //await lib(u,p,size_s);	
-pleasure.push(lib(u,p,size_s));
+pleasure.push(lib(o.downloads.classifiers["natives-windows"].sha1,u,p,size_s));
 }catch(e){
 	console.log("Crashed x1");
 }
-lib_natives.push(path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`));
+lib_natives.push(path.join(__minecraft,`./libraries/${p}`));
 libss.push(u)
 }
 }
 else{
-var x64=(os.arch().indexOf("64"))>0;
+
 if(x64&&(o.downloads.classifiers["natives-windows-64"]&&o.downloads.classifiers["natives-windows-64"]["url"]&&o.downloads.classifiers["natives-windows-64"]["path"])){
 u=o.downloads.classifiers["natives-windows-64"].url;
 p=o.downloads.classifiers["natives-windows-64"].path;
@@ -616,12 +837,12 @@ console.log(u);
 global_resource[u]=1;
 try{
 //await lib(u,p,size_s);	
-pleasure.push(lib(u,p,size_s));
+pleasure.push(lib(o.downloads.classifiers["natives-windows-64"].sha1,u,p,size_s));
 
 }catch(e){
 	console.log("Crashed x1");
 }
-lib_natives.push(path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`));
+lib_natives.push(path.join(__minecraft,`./libraries/${p}`));
 libss.push(u)
 }
 }
@@ -634,11 +855,11 @@ console.log(u);
 global_resource[u]=1;
 try{
 //await lib(u,p,size_s);	
-pleasure.push(lib(u,p,size_s));
+pleasure.push(lib(o.downloads.classifiers["natives-windows-32"].sha1,u,p,size_s));
 }catch(e){
 	console.log("Crashed x1");
 }
-lib_natives.push(path.join(__dirname,`./mcfiles/.minecraft/libraries/${p}`));
+lib_natives.push(path.join(__minecraft,`./libraries/${p}`));
 libss.push(u)
 }
 }
@@ -648,7 +869,15 @@ libss.push(u)
 
 console.log("continue")
 
-
+if(localStorage["multi_count"]&&(localStorage["multi_count"]>0))//s,not i
+	if(s%(Math.floor(localStorage["multi_count"]/2))==0)try{
+		await Promise.all(pleasure)
+	}catch(e){console.warn("AKLJHGFD",e)}
+	else if(!localStorage["multi_count"]){
+		if(s%10==0)try{
+			await Promise.all(pleasure)
+			}catch(e){console.warn("AKLJHGFD",e)}
+		}
 }
 await Promise.all(pleasure);
 processs=70;
@@ -663,10 +892,10 @@ push_log("NOTHING TO FIX")
 
 part_process=0;
 let per_o1=10/lib_natives.length,per_o2=100/lib_natives.length;
-dirs.mkdirsSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`));
+dirs.mkdirsSync(path.join(__minecraft,`./versions/${obj.id}/${obj.id}-natives`));
 let jar_path=path.join(__dirname,".\\jre8-"+(x64?"32":"32"),"bin","jar.exe");
 importScripts(path.join(__dirname,"./natives.js"));
-await jar_natives(path.join(__dirname,`./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`),...lib_natives);
+await jar_natives(path.join(__minecraft,`./versions/${obj.id}/${obj.id}-natives`),...lib_natives);
 debugger;
 processs=80;
 part_process=0;
@@ -694,6 +923,8 @@ onmessage=async function(e){
 	let obj=JSON.parse(e.data);
 	Object.assign(this,obj);
 	Object.assign(window,obj);
+	console.log(obj)
+	if(__minecraft)__minecraft=obj.__minecraft;
 	__main();
 	if(obj.main_exec)
 	{functions.d(obj.d_num);}

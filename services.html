@@ -8,8 +8,8 @@
 <body>
 <div>
 当前进度：<span id="part_range">0%</span><br />
-总进度：<span id="all_range">0%</span>
-
+总进度：<span id="all_range">0%</span><br />
+倒计时：<span id="inter_range">20s</span>
 </div>
 <div style="position:absolute;width:99vw;bottom:80%;">
 <span onmouseover="document.querySelector('#logs').hidden=false;document.querySelector('#fixs').hidden=true ;" class="tags">日志</span>
@@ -66,7 +66,9 @@ table{
 <script>
 window.$=function(doc){return document.querySelector(doc);}
 let worker;
+let interval=-1,it=10;
 const fs=require("fs")
+const __dirname=process.cwd()
 let branch_worker=[];
 if(!window["debug_judge"]){
 
@@ -77,7 +79,8 @@ ver_arr:ver_arr,
 url_arr:url_arr,
 d_num:d_num,
 assets_root:assets_root,
-localStorage:localStorage
+localStorage:localStorage,
+__minecraft:__minecraft
 }));
 worker.onmessage=function(ev){
 console.log(ev);
@@ -93,6 +96,20 @@ $("#part_range").innerHTML=e.data.value+"%";
 }
 if(e.data.type=="create_worker"){
 eval(e.data.value);
+}
+if(e.data.type=="succeed"){
+alert("下载完毕，请检查错误并重启");
+clearInterval(interval)
+}
+if(e.data.type=="interval"){
+if(interval>-1)
+clearInterval(interval);
+interval=setInterval(function(){$("#inter_range").innerHTML=it+"s";it--;if(it==-1){
+$("#logs").innerHTML+="超时*1<br />";
+clearInterval(interval)
+}
+},1000);
+it=e.data.value;
 }
 if(e.data.type=="failed_libraries"||e.data.type=="failed_assets"){
 let line=document.createElement("tr");
@@ -118,6 +135,8 @@ a5_1.onclick=new Function(`re_download_libraries(this);`);
 else
 a5_1.onclick=new Function(`re_download_assets(this);`);
 a5_1["dataset"]["path"]=e.data.value.y;
+if(e.data.type=="failed_assets")
+a5_1["dataset"]["hash"]=e.data.value.x;
 a5_1["dataset"]["url"]=e.data.value.z;
 let a5_2=document.createElement("a");
 a5_2.innerHTML="放弃";

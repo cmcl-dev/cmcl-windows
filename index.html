@@ -5,7 +5,20 @@
 <script>
 //@xmcl/installer
 //minecraft-launcher-core
-
+function restart() {
+	const nw=require("nw.gui")
+	var child, child_process = require('child_process');
+	console.log(process.platform, process.execPath)
+	if (process.platform == "darwin")  {
+		child = child_process.spawn("open", ["-n", "-a", process.execPath.match(/^([^\0]+?\.app)\//)[1]], {detached:true});
+	} else {
+		child = child_process.spawn(process.execPath, [".\\"], {detached: true});
+	}
+	child.unref();
+	nw.Window.get().hide();
+	nw.App.quit();
+}
+(function(){
 window.$=function(c){return document.querySelector(c);}
 const cp=require('child_process');
 const fs=require('fs');
@@ -18,10 +31,11 @@ const os=require('os');
 window.launcher={
 name:"CMCL",
 type:"pro",
-version:"v1.7-pre"
+version:"v1.7"
 };
 //window.__dirname=path.dirname(process.execPath)
 window.__dirname=localStorage["dirname"]?localStorage["dirname"]:(process.cwd());
+window.__minecraft=localStorage["minecraft_path"]?localStorage["minecraft_path"]:(path.join(__dirname,".\\.minecraft"));
 window.asset=0;
 window.https_agent=new https.Agent({timeout:60000});
 window.http_agent=new http.Agent({timeout:60000});
@@ -147,7 +161,7 @@ window.assets_root=localStorage["custom_assets"];
 }
 }
 
-
+})();
 
 window.c=0;
 window.ar_s=0;
@@ -163,26 +177,33 @@ __dirname_=__dirname;
 </script>
 <script>
 
-
+(function(){
+const cp=require('child_process');
+const fs=require('fs');
+const http=require('http');
+const https=require('https');
+const path=require('path');
+const os=require('os');
 if(!fs.existsSync(path.join(__dirname,".\\mcfiles"))){
 fs.mkdirSync((path.join(__dirname,".\\mcfiles")));
 }
-if(!fs.existsSync(path.join(__dirname,".\\mcfiles\\.minecraft"))){
+if(!fs.existsSync(__minecraft)){
 
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\assets")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\configs")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\versions")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\libraries")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\saves")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\resourcepacks")));
-fs.mkdirSync((path.join(__dirname,".\\mcfiles\\.minecraft\\logs")));
+fs.mkdirSync(__minecraft);
+fs.mkdirSync((path.join(__minecraft,".\\assets")));
+fs.mkdirSync((path.join(__minecraft,".\\configs")));
+fs.mkdirSync((path.join(__minecraft,".\\versions")));
+fs.mkdirSync((path.join(__minecraft,".\\libraries")));
+fs.mkdirSync((path.join(__minecraft,".\\saves")));
+fs.mkdirSync((path.join(__minecraft,".\\resourcepacks")));
+fs.mkdirSync((path.join(__minecraft,".\\logs")));
 };
 if(!fs.existsSync(path.join(__dirname,".\\serverfiles"))){
 fs.mkdirSync((path.join(__dirname,".\\serverfiles")));
 fs.mkdirSync((path.join(__dirname,".\\serverfiles\\versions")));
 fs.mkdirSync((path.join(__dirname,".\\serverfiles\\actives")));
 }
+})();
 </script>
 <script>
 String.prototype.replaceAll=function(a,b){
@@ -242,7 +263,7 @@ download_window.url_arr=window.url_arr;
 download_window.d_num=num;
 download_window.debug_judge=debug;
 download_window.assets_root=assets_root;
-
+download_window.__minecraft=__minecraft;
 };
 window.onbeforeunload = function () {
     //window.download_window.close();
@@ -271,7 +292,7 @@ ver.appendChild(o);
 }
 )();
 function updated(versions_know){
-let aht=path.join(__dirname,".\\mcfiles\\.minecraft\\versions\\");
+let aht=path.join(__minecraft,".\\versions\\");
 let paths = fs.readdirSync(aht);
 let ver=$("#forgever");
 paths.forEach(function(patho){
@@ -312,26 +333,28 @@ let optifine=document.getElementById("optifine").checked;
 let optifine_file;
 if(optifine)optifine_file=$('#optifinever').options[$('#optifinever').selectedIndex].value;
 if(forge)forgename=$('#forgever').options[$('#forgever').selectedIndex].value;
-let pprim=path.join(__dirname,".\\mcfiles\\.minecraft\\libraries\\");
+let pprim=path.join(__minecraft,".\\libraries\\");
 
 let username=document.getElementById("name").value;
-let djava_library=path.join(__dirname,`.\\mcfiles\\.minecraft\\versions\\${num}\\${num}-natives`);
+let djava_library=path.join(__minecraft,`.\\versions\\${num}\\${num}-natives`);
 let forge_json;
 //let djava_library=path.join(__dirname,`.\\mcfiles\\natives`);
 //.\\jre8\\bin\\javaw.exe
 //C:\\ProgramData\\Oracle\\Java-PE\\jre1.8\\x64\\bin\\java.exe
 if(forge){
-djava_library=path.join(__dirname,`.\\mcfiles\\.minecraft\\versions\\${forgename}\\${forgename}-natives`);
+djava_library=path.join(__minecraft,`.\\versions\\${forgename}\\${forgename}-natives`);
 }
-let str=`"${java_path}" -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow  `+
+let str=`"${java_path}" -Xms1024M -Xmx1024M -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow  `+
 ` -Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true  -Djava.library.path="${djava_library}" `;
 //alert(str)
 
 if(1){
-var obj;
+console.log((path.join(__minecraft,`./versions/${num}/${num}.json`)))
+var obj={};
 try{
-obj=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${num}/${num}.json`)));
-forge_json=JSON.parse(fs.readFileSync(path.join(__dirname,`./mcfiles/.minecraft/versions/${forgename}/${forgename}.json`)));
+let sufv=path.join(__minecraft,`./versions/${num}/${num}.json`);
+obj=JSON.parse(fs.readFileSync(sufv));
+if(forge)forge_json=JSON.parse(fs.readFileSync(path.join(__minecraft,`./versions/${forgename}/${forgename}.json`)));
 }catch(e){console.log(e);return;}
 var libraries=obj.libraries;
 console.log(libraries)
@@ -358,7 +381,7 @@ for (var s=0;s<libraries.length;s++){
 var o=libraries[s];
 var u,p,pprim_slow;
 try{
-console.log(o.downloads.artifact.path)
+
 if(o.downloads.artifact){
 p=o.downloads.artifact.path;
 pprim_slow=path.join(pprim,p);
@@ -415,7 +438,7 @@ libb.splice(libbbb[main_name].index, 1);
 //libbb=unique(libbb);
 ssssss=libbb.join(";");
 str=str.replace("obj.mainClass",``)
-var main_part=path.join(__dirname,`\\mcfiles\\.minecraft\\versions\\${num}\\${num}.jar`);
+var main_part=path.join(__minecraft,`.\\versions\\${num}\\${num}.jar`);
 var mainclass=(forge)?(forge_json.mainClass):(obj.mainClass);
 ssssss+=(`;${main_part}\" ${mainclass}`);
 ssssss+=" ";
@@ -449,15 +472,15 @@ var minecraftArguments=obj.minecraftArguments
 .replace("${auth_player_name}",	que+username				 											+que)
 .replace("${version_name}",		que+version_name														+que)
 .replace("${version_type}",		que+launcher.name+launcher.version			 							+que)
-.replace("${game_directory}",	que+(path.join(__dirname,".\\mcfiles\\.minecraft"))			 			+que)
-.replace("${assets_root}",		que+(path.join(__dirname,".\\mcfiles\\.minecraft\\assets")) 			+que)
+.replace("${game_directory}",	que+__minecraft											 				+que)
+.replace("${assets_root}",		que+(path.join(__minecraft,".\\assets")) 								+que)
 .replace("${assets_index_name}",que+obj.id				 	 											+que)
 .replace("${auth_uuid}",		que+"02f3fcd468e1b0a8048e7575c68c4733"									+que)
 .replace("${auth_access_token}",que+"02f3fcd468e1b0a8048e7575c68c4733"									+que)
-.replace("${user_properties}",	que+"{}"+que)
-.replace("${user_type}",		que+"Legacy"+que)
-.replace("${launcher_name}",	que+launcher.name+que)
-.replace("${launcher_version}",	que+launcher.version+que)
+.replace("${user_properties}",	que+"{}"																+que)
+.replace("${user_type}",		que+"Legacy"															+que)
+.replace("${launcher_name}",	que+launcher.name														+que)
+.replace("${launcher_version}",	que+launcher.version													+que)
 .replace("${classpath}",		"")
 str+=minecraftArguments;
 }
@@ -678,7 +701,7 @@ window.load_ver=function(){
 		var oo=document.createElement("p");
 		var o=document.createElement("a");
 		o.href="#"+ss;
-		o.onclick=new Function(`$("#dialoga").hidden=false;$("#ver_set_span").innerHTML=ver_arr[${ss}];$("#rsdownload").onclick=function(){if($("#client_download_confirm").checked)down_d(${ss});if($("#server_download_confirm").checked)download_server(${ss});if($("#forge_checked_choose_download").checked)download_forge();};window.dlg_ver=${ss};`);
+		o.onclick=new Function(`$("#dialoga").hidden=false;$("#ver_set_span").innerHTML=ver_arr[${ss}];$("#rsdownload").onclick=function(){if($("#client_download_confirm").checked)down_d(${ss});if($("#server_download_confirm").checked)download_server(${ss});if($("#forge_checked_choose_download").checked)window.download_forge();};window.dlg_ver=${ss};`);
 		o.innerHTML=ver_arr[ss];
 		oo.appendChild(o);
 		oo.style.margin=0;
@@ -770,6 +793,7 @@ input[id*=custom]{width:50%;}
 <a onclick="window.download_json(0);" href="#">下载BMCL镜像JSON</a>
 <a onclick="force_ver();" href="#">强制加载版本</a>
 <a onclick="r();" href="#">重新加载网页</a>
+<a onclick="restart();" href="#">重启</a>
 </div>
 <div class="page4" hidden>
 <button onclick="create_new_server();">新建服务器</button>

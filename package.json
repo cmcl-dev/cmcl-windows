@@ -17,5 +17,5 @@
   "node-main": "services.js",
   "description": "demo app of node-webkit",
   "chromium-args": "--enable-node-worker",
-  "version": "0.9.7"
+  "version": "1.8"
 }

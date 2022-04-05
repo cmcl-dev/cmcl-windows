@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>First-Launch Settings</title>
+        <link rel="stylesheet" href="./lib/bootstrap.v4.1.3/css/bootstrap.min.css">
+	    <script src="./lib/bootstrap.v4.1.3/js/jquery.min.js"></script>
+        
+        <script src="./lib/bootstrap-select-1.13.14/js/popper.min.js"></script>
+        <!--
+            <script src="./lib/bootstrap.v4.1.3/js/bootstrap.min.js"></script>
+        -->
+	    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="./lib/bootstrap-select-1.13.14/css/bootstrap-select.min.css">
+        <script src="./lib/bootstrap-select-1.13.14/js/bootstrap-select.min.js"></script>
+        <style>
+            .pages{
+                background:white;position:absolute;width:33%;left:33%;height:100%;background-repeat: no-repeat;text-align: center;
+            }
+        </style>
+    </head>
+    <body style="background-image:url(background.jpg);background-attachment:fixed;background-size: cover;background-repeat:no-repeat;background-color:#39add5;">
+        <div id="page1" class="pages">
+            <h1 id="choose-language">Please Choose Your Language</h1>
+            <select id="show-language" style="text-align: center;border-radius: 10%;" class="selectpicker">
+
+            </select>
+            <br />
+            <button style="text-align: center;" id="next-button-1" class="next-button">Next</button>
+        </div>
+        <div id="page2" hidden class="pages">
+            <h1 id="choose-download">Minecraft Download Mirrors</h1>
+            <a id="download_mojang_json" href="#">Download JSON Cache(Mojang)</a><br />
+            <a id="download_bmcl_json" href="#">Download JSON Cache(BMCL)</a><br />
+            <a id="download_mcbbs_json" href="#">Download JSON Cache(MCBBS)</a><br />
+            <select id="show-mirrors" class="selectpicker" style="text-align: center;border-radius: 10%;" onchange="localStorage.api=this.selectedOptions[0].dataset['apiValue']">
+                <option id="show-mirrors-1" data-api-value="mojang">Mojang(Optifine is serviced by BMCLAPI)</option>
+                <option id="show-mirrors-2" data-api-value="bmcl">BMCLAPI</option>
+                <option id="show-mirrors-3" data-api-value="mcbbs">MCBBS</option>
+            </select>
+            <br />
+            <button style="text-align: center;" id="next-button-2" class="next-button">Next</button>
+        
+        </div>
+        <div id="page3" hidden class="pages">
+            <h1 id="location-label">Current location of .minecraft</h1>
+            <select id="show-locations" class="selectpicker" style="text-align: center;border-radius: 10%;">
+                <option id="show-locations-1" data-location-value="mcfiles">mcfiles/.minecraft</option>
+                <option id="show-locations-2" data-api-value="userdir">User's Directory</option>
+                <option id="show-locations-3" data-api-value="custom">Custom</option>
+            </select>
+            <br />
+            <input hidden id="choose-directory-file" nwdirectory type="file" />
+            <label>Custom:</label><input disabled id="minecraft_env" style="width:80%;" />
+            <button style="text-align: center;" id="set_minecraft_path" class="next-button">Next</button>
+        </div>
+        <script>
+            try{
+                const __dirname=process.cwd();
+                const path=require("path")
+                let pj=function(pn){
+                    return require("path").join(__dirname,pn);
+                }
+                let $=function(ele){
+                    return document.querySelector(ele);
+                }
+                
+                const fs=require("fs");
+                let select=$("select");
+                let json=JSON.parse(fs.readFileSync(pj("./i18n/settings.json")));
+                let global_langs={};
+                for (let i=0;i<json.lists.length;i++){
+                    let lang=JSON.parse(fs.readFileSync(pj(`./i18n/${json.lists[i]}/manifest.json`)));
+                    global_langs[ json.lists[i] ]=lang;
+                    let _=document.createElement("option");
+                    _.value=_.innerHTML=lang.show;
+                    _.dataset.id=lang.name;
+                    _.dataset.turn=i;
+                    select.appendChild(_);
+                }
+                select.onchange=function(){
+                    let id=this.selectedOptions[0].dataset.id,turn=this.selectedOptions[0].dataset.turn;
+                    console.log(id)
+                    for (let j=0;j<global_langs[id].files.length;j++){
+                        if(fs.existsSync(pj(`./i18n/${id}/${global_langs[id].files[j]}`))){
+                            let lang_file=JSON.parse(fs.readFileSync(pj(`./i18n/${json.lists[turn]}/${global_langs[id].files[j]}`)));
+                            let next_buttons=document.querySelectorAll("button.next-button");
+                            for (let s in next_buttons){
+                                next_buttons[s].value=next_buttons[s].innerHTML=lang_file.lists["@first-launch/next"];
+                            }
+                            $("h1#choose-language").innerHTML=lang_file.lists["@first-launch/choose-lang"];
+                            $("h1#choose-download").innerHTML=lang_file.lists["@first-launch/choose-download"];
+                            $("option#show-mirrors-1").innerHTML=lang_file.lists["@first-launch/choose-download-option-1"];
+                            $("option#show-mirrors-2").innerHTML=lang_file.lists["@first-launch/choose-download-option-2"];
+                            $("option#show-mirrors-3").innerHTML=lang_file.lists["@first-launch/choose-download-option-3"];
+                            $("#download_mojang_json").innerHTML=lang_file.lists["@first-launch/download-json-cache-mojang"];
+                            $("#download_bmcl_json").innerHTML=lang_file.lists["@first-launch/download-json-cache-bmcl"];
+                            $("#download_mcbbs_json").innerHTML=lang_file.lists["@first-launch/download-json-cache-mcbbs"];
+                            $("#show-locations-2").innerHTML=lang_file.lists["@first-launch/choose-location-option-2"];
+                            $("#show-locations-3").innerHTML=lang_file.lists["@first-launch/choose-location-option-3"];
+                            $("#location-label").innerHTML=lang_file.lists["@first-launch/choose-directory"];
+                            return;
+                        }
+                        else{
+                            console.log("不存在",pj(`./i18n/${id}/${global_langs[id].files[j]}`))
+                        }
+                    }
+                }
+                $("button#next-button-1").onclick=function(){
+                    localStorage["i18n"]=select.selectedOptions[0].dataset.id;
+                    $("#page1").hidden=true;
+                    $("#page2").hidden=false;
+                    $("#page3").hidden=true;
+                }
+                $("button#next-button-2").onclick=function(){
+                    $("#page1").hidden=true;
+                    $("#page2").hidden=true;
+                    $("#page3").hidden=false;
+                }
+                function json_download(num, urls) {
+						//http://hostker.bmclapi.933.moe:4000/download/ebf4db522bbf78b88253d045955675c7?name=version_manifest.json
+						//https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+						/*
+						https://launchermeta.mojang.com/mc/game/version_manifest.json
+						https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+						https://download.mcbbs.net/mc/game/version_manifest.json
+						*/
+                        console.log(arguments)
+						let url_list = ["https://bmclapi2.bangbang93.com/mc/game/version_manifest.json",
+							"https://launchermeta.mojang.com/mc/game/version_manifest.json",
+							"https://download.mcbbs.net/mc/game/version_manifest.json"];
+						urls = urls ? urls : url_list[num];
+						(fetch(urls).then(vu => vu.json()).then(function (objs) { console.log(objs); fs.writeFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json"), JSON.stringify(objs)); }));
+
+					}
+                    window.$=(e=>document.querySelector(e))
+                    $("#download_mojang_json").onclick=function(){
+                        json_download(0,"https://launchermeta.mojang.com/mc/game/version_manifest.json");
+                    }
+                    $("#download_bmcl_json").onclick=function(){
+                        json_download(0,"https://bmclapi2.bangbang93.com/mc/game/version_manifest.json");
+                    }
+                    $("#download_mcbbs_json").onclick=function(){
+                        json_download(0,"https://download.mcbbs.net/mc/game/version_manifest.json");
+                    }
+                    $("#show-locations").onchange=function(){
+                        const path=require("path");
+                        const path_list=[
+                            (path.join(__dirname, ".\\mcfiles\\.minecraft")),
+                            (path.join(process.env.USERPROFILE,".\\.minecraft")),
+                            $("#minecraft_env").value
+                        ];
+                        $("#minecraft_env").disabled=!($("#show-locations-3").selected);
+                        $("#minecraft_env").value=path_list[this.selectedIndex]
+                    }
+                    $("#set_minecraft_path").onclick=function(){
+                        const path=require("path");
+                        const path_list=[
+                            (path.join(__dirname, ".\\mcfiles\\.minecraft")),
+                            (path.join(process.env.USERPROFILE,".\\.minecraft")),
+                            $("#minecraft_env").value
+                        ];
+                        localStorage["minecraft_path"]=path_list[$("#show-locations").selectedIndex]
+                        location="/index.html";
+                    }
+                    $("#minecraft_env").onclick=function(){
+                        $("input[type=file]").click();
+                    }
+                    $("input[type=file]").onchange=function(){
+                        console.log(111)
+                        $("#minecraft_env").value=this.value;
+                    }
+            }catch(e){
+                alert("遇到错误:"+e.toString());
+                console.log(e)
+            }
+            
+					 
+        </script>
+    </body>
+</html>

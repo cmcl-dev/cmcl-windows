@@ -1,0 +1,2029 @@
+﻿<!doctype html>
+<html>
+
+<head>
+	<link rel="shortcut icon" type="image/png" href="command.png" />
+	<script src="restart.js"></script>
+
+	<link rel="stylesheet" href="./lib/bootstrap.v4.1.3/css/bootstrap.min.css" />
+	<script src="lib/bootstrap.v4.1.3/js/jquery.min.js"></script>
+	<script src="./lib/bootstrap-select-1.13.14/js/popper.min.js"></script>
+	<script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+	<script src="./lib/bootstrap.v4.1.3/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="lib/font-awesome-4.7.0/css/font-awesome.min.css" />
+
+	<!--
+		<script src="./lib/bootstrap.v4.1.3/js/bootstrap.min.js"></script>
+	-->
+	<link rel="stylesheet" href="./lib/bootstrap-select-1.13.14/css/bootstrap-select.min.css">
+	<script src="./lib/bootstrap-select-1.13.14/js/bootstrap-select.min.js"></script>
+	<style>
+		label {
+			margin-bottom: 0 !important;
+			font-family: none !important;
+		}
+	</style>
+
+	<script>
+		window.__dirname = localStorage["dirname"] ? localStorage["dirname"] : (process.cwd());
+		//@xmcl/installer
+		//minecraft-launcher-core
+		(function () {
+			localStorage['history-name'] = (localStorage['history-name']) ? (localStorage['history-name']) : (`[]`);
+			let pj = function (pn) {
+				return require("path").join(__dirname, pn);
+			}
+			const fs = require("fs");
+			try {
+				if (!localStorage["i18n"]) location = "./settings-first.html";
+				else {
+					const i18n = require("./i18n/settings.json").lists;
+					if (i18n.indexOf(localStorage["i18n"]) == -1) location = "./settings-first.html";
+					let manifest = require(`./i18n/${localStorage["i18n"]}/manifest.json`);
+					let id = localStorage["i18n"];
+					for (let j = 0; j < manifest.files.length; j++) {
+						if (fs.existsSync(pj(`./i18n/${id}/${manifest.files[j]}`))) {
+							let lang_file = JSON.parse(fs.readFileSync(pj(`./i18n/${id}/${manifest.files[j]}`)));
+							window.i18n_native = lang_file.lists;
+							return;
+						}
+						else {
+							console.log("不存在", pj(`./i18n/${id}/${global_langs[id].files[j]}`))
+						}
+					}
+				}
+			} catch (e) {
+				console.log(e);
+			}
+
+		})();
+		(function () {
+			window.$ = function (c) { return document.querySelector(c); }
+			const cp = require('child_process');
+			const fs = require('fs');
+			const http = require('http');
+			const https = require('https');
+			const path = require('path');
+			const os = require('os');
+
+
+			window.launcher = {
+				name: "CMCL",
+				type: "pro",
+				version: "v1.7"
+			};
+			//window.__dirname=path.dirname(process.execPath)
+
+			window.__minecraft = localStorage["minecraft_path"] ? localStorage["minecraft_path"] : (path.join(__dirname, ".\\.minecraft"));
+			window.asset = 0;
+			window.https_agent = new https.Agent({ timeout: 60000 });
+			window.http_agent = new http.Agent({ timeout: 60000 });
+
+			window.local_url_arr = [
+				"https://launchermeta.mojang.com/v1/packages/b71bae449192fbbe1582ff32fb3765edf0b9b0a8/1.6.4.json",
+				"https://launchermeta.mojang.com/v1/packages/83a7d28760ed623225e7cb2e29db140cc68540e8/1.7.2.json",
+				"https://launchermeta.mojang.com/v1/packages/b06faa2910235ba9ecfab434e54e04a0d5f6187d/1.7.4.json",
+				"https://launchermeta.mojang.com/v1/packages/a0481eaa9979795bb567398a02cc3d7a3775403a/1.7.5.json",
+				"https://launchermeta.mojang.com/v1/packages/4cdba7fb4ea885d508bf7469812bdcee6b490681/1.7.6.json",
+				"https://launchermeta.mojang.com/v1/packages/ef55209910a073339aadf8394bb3504f6c03048c/1.7.7.json",
+				"https://launchermeta.mojang.com/v1/packages/b9b245eb23540c2bb1f5886b1d3a353870c8b684/1.7.8.json",
+				"https://launchermeta.mojang.com/v1/packages/930a26a3c81803e2f6b9a4069ac14c2e7aaf3b8a/1.7.9.json",
+				"https://launchermeta.mojang.com/v1/packages/2e818dc89e364c7efcfa54bec7e873c5f00b3840/1.7.10.json",
+				"https://launchermeta.mojang.com/v1/packages/c6309181ce8df8a06ed556e315cd4636c4082b9a/1.8.json",
+				"https://launchermeta.mojang.com/v1/packages/cc3bf2b602bcb4d55b4581ea9bb55c4e4b2d9bc9/1.8.1.json",
+				"https://launchermeta.mojang.com/v1/packages/05655de45c43872c48eea1e07ae9740bc4cdf47e/1.8.2.json",
+				"https://launchermeta.mojang.com/v1/packages/94f0e372077d0fe6cfeaad990b2c25ba67b3531c/1.8.3.json",
+				"https://launchermeta.mojang.com/v1/packages/bf6b4b4bef435804faacc6fb8d350119a7482262/1.8.4.json",
+				"https://launchermeta.mojang.com/v1/packages/ced2d59fde6e68ca9e84bbb00e5c7dc9c052df06/1.8.5.json",
+				"https://launchermeta.mojang.com/v1/packages/13b52ffde81121125d69aec94589abfba7e04147/1.8.6.json",
+				"https://launchermeta.mojang.com/v1/packages/87c78678d155ff55fc91fc64a7a84f2daf855f1e/1.8.7.json",
+				"https://launchermeta.mojang.com/v1/packages/389ee2576f1c7ac6efe0edcec79f2e465d2a5278/1.8.8.json",
+				"https://launchermeta.mojang.com/v1/packages/856d9bec08b0d567de39f46efaf4b76066b53059/1.8.9.json",
+				"https://launchermeta.mojang.com/v1/packages/fab85b386a3de3009e5944b0183ce063faa09691/1.9.json",
+				"https://launchermeta.mojang.com/v1/packages/a7c5c055718d8e7d709f3f2338b4e8f1125b5aae/1.9.1.json",
+				"https://launchermeta.mojang.com/v1/packages/3cc8cee91366290508c8767e8826c6352c2b89c5/1.9.2.json",
+				"https://launchermeta.mojang.com/v1/packages/e8bab05ecee645e3c9b962f532ca7fd6c52e120e/1.9.3.json",
+				"https://launchermeta.mojang.com/v1/packages/7f40b382dedcfe9eca74a5b14d615075ec34c108/1.9.4.json",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				""
+
+			];
+			window.local_ver_arr = [
+				"1.6.4",
+				"1.7.2",
+				"1.7.4",
+				"1.7.5",
+				"1.7.6",
+				"1.7.7",
+				"1.7.8",
+				"1.7.9",
+				"1.7.10",
+				"1.8",
+				"1.8.1",
+				"1.8.2",
+				"1.8.3",
+				"1.8.4",
+				"1.8.5",
+				"1.8.6",
+				"1.8.7",
+				"1.8.8",
+				"1.8.9",
+				"1.9"
+			];
+			window.local_type_arr = [
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release",
+				"release"
+			];
+
+			localStorage["api"] = localStorage["api"] ? (localStorage["api"]) : ((function () { return "local"; })());
+			if (localStorage["api"] == "local") {
+				window.url_arr = window.local_url_arr;
+				window.ver_arr = window.local_ver_arr;
+				window.type_arr = window.local_type_arr;
+				window.assets_root = "https://resources.download.minecraft.net";
+			}
+			else if (localStorage["api"] == "bmcl") {
+				var obj = JSON.parse(fs.readFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json")));
+				var ver = obj.versions;
+				window.url_arr = [];
+				window.ver_arr = [];
+				window.type_arr = [];
+				for (var s = ver.length - 1; s--;) {
+					//if(ver[s].type!=="old_alpha")
+					if (1) {
+						url_arr.push(ver[s].url);
+						ver_arr.push(ver[s].id);
+						type_arr.push(ver[s].type);
+					}
+
+				}
+				window.assets_root = "https://bmclapi2.bangbang93.com/assets";
+			}
+			else if (localStorage["api"] == "mojang") {
+				var obj = JSON.parse(fs.readFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json")));
+				window.mojang_ver = obj.versions;
+				window.url_arr = [];
+				window.ver_arr = [];
+				window.type_arr = [];
+				for (var s = mojang_ver.length - 1; s--;) {
+					//if(mojang_ver[s].type!=="old_alpha")
+					if (1) {
+						url_arr.push(mojang_ver[s].url);
+						ver_arr.push(mojang_ver[s].id);
+						type_arr.push(mojang_ver[s].type);
+					}
+					window.assets_root = "https://resources.download.minecraft.net";
+				}
+			}
+			else if (localStorage["api"] == "mcbbs") {
+				var obj = JSON.parse(fs.readFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json")));
+				var ver = obj.versions;
+				window.url_arr = [];
+				window.ver_arr = [];
+				window.type_arr = [];
+				for (var s = ver.length - 1; s--;) {
+					//if(ver[s].type!=="old_alpha")
+					if (1) {
+						url_arr.push(ver[s].url);
+						ver_arr.push(ver[s].id);
+						type_arr.push(ver[s].type);
+					}
+
+				}
+				window.assets_root = "https://download.mcbbs.net/assets";
+			}
+			else if (localStorage["api"] == "custom") {
+				var obj = JSON.parse(fs.readFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json")));
+				window.mojang_ver = obj.versions;
+				window.url_arr = [];
+				window.ver_arr = [];
+				window.type_arr = [];
+				for (var s = mojang_ver.length - 1; s--;) {
+					//if(mojang_ver[s].type!=="old_alpha")
+					if (1) {
+						url_arr.push(mojang_ver[s].url);
+						ver_arr.push(mojang_ver[s].id);
+						ver_arr.push(mojang_ver[s].type);
+					}
+					window.assets_root = localStorage["custom_assets"];
+				}
+			}
+
+		})();
+
+		window.c = 0;
+		window.ar_s = 0;
+
+		window.r = function () { location.reload(); };
+	</script>
+	<script>
+		with (global) {
+			require_ = require;
+			__dirname_ = __dirname;
+		}
+
+	</script>
+	<script>
+
+		(function () {
+			const cp = require('child_process');
+			const fs = require('fs');
+			const http = require('http');
+			const https = require('https');
+			const path = require('path');
+			const os = require('os');
+			if (!fs.existsSync(path.join(__dirname, ".\\mcfiles"))) {
+				fs.mkdirSync((path.join(__dirname, ".\\mcfiles")));
+			}
+			if (!fs.existsSync(__minecraft))
+				fs.mkdirSync(__minecraft);
+			if (!fs.existsSync(path.join(__minecraft, ".\\assets")))
+				fs.mkdirSync((path.join(__minecraft, ".\\assets")));
+			if (!fs.existsSync(path.join(__minecraft, ".\\configs")))
+				fs.mkdirSync((path.join(__minecraft, ".\\configs")));
+			if (!fs.existsSync(path.join(__minecraft, ".\\versions")))
+				fs.mkdirSync((path.join(__minecraft, ".\\versions")));
+			if (!fs.existsSync(path.join(__minecraft, ".\\libraries")))
+				fs.mkdirSync((path.join(__minecraft, ".\\libraries")));
+			if (!fs.existsSync(path.join(__minecraft, ".\\saves")))
+				fs.mkdirSync((path.join(__minecraft, ".\\saves")));
+			if (!fs.existsSync(path.join(__minecraft, ".\\resourcepacks")))
+				fs.mkdirSync((path.join(__minecraft, ".\\resourcepacks")));
+
+			if (!fs.existsSync(path.join(__minecraft, ".\\logs")))
+				fs.mkdirSync((path.join(__minecraft, ".\\logs")));
+			if (!fs.existsSync(path.join(__dirname, ".\\serverfiles"))) {
+				fs.mkdirSync((path.join(__dirname, ".\\serverfiles")));
+				fs.mkdirSync((path.join(__dirname, ".\\serverfiles\\versions")));
+				fs.mkdirSync((path.join(__dirname, ".\\serverfiles\\actives")));
+			}
+		})();
+	</script>
+	<script>
+		String.prototype.replaceAll = function (a, b) {
+			var c = this;
+			while (c.indexOf(a) !== -1) {
+				c = c.replace(a, b);
+			}
+			return c;
+		}
+
+	</script>
+	<style>
+		body {
+			overflow: hidden;
+		}
+
+		input::-webkit-calendar-picker-indicator {
+			display: none;
+			-webkit-appearance: none;
+		}
+
+		input[type="text"] {
+			-webkit-appearance: menulist;
+		}
+
+		input.accept {
+			background: green;
+		}
+
+		input.inaccept {
+			background: red;
+		}
+	</style>
+</head>
+
+<body
+	 style="background-attachment:	fixed;background-image:	url(background.jpg);background-size: cover;background-repeat:	no-repeat;background-color:	#39add5;display:	flex;flex-direction: column;">
+
+	<nav class="navbar navbar-expand-sm justify-content-center bg-primary">
+
+		<div class="nav-item"
+			 style="display:block;position:absolute;left:0;padding:0;margin:0;justify-content: center;">
+			<span class="nav-link" href="#" style="justify-content: center;">Convenient MCL</span>
+		</div>
+		<ul class="navbar-nav">
+			<li class="nav-item active">
+				<span class="nav-link nav-linker act" href="#" data-link-page=".page1"><i class="fa fa-power-off"></i>
+					<!--/*启动游戏*/-->
+					<script>
+						document.write(i18n_native["@launch-game/label"]);
+					</script>
+				</span>
+			</li>
+			<li class="nav-item">
+				<span class="nav-link nav-linker" href="#" data-link-page=".page2"><i class="fa fa-cloud-download"></i>
+					<!--/*下载Minecraft*/-->
+					<script>
+						document.write(i18n_native["@download-minecraft/label"]);
+					</script>
+				</span>
+			</li>
+			<li class="nav-item">
+				<span class="nav-link nav-linker" href="#" data-link-page=".page3"><i class="fa fa-cog"></i>
+					<!--/*设置*/-->
+					<script>
+						document.write(i18n_native["@settings/label"]);
+					</script>
+				</span>
+			</li>
+		</ul>
+		<div class="nav-item"
+			 style="display:inline-block;position:absolute;right:0;padding:0;margin-right:0;justify-content: center;">
+			<span class="nav-link" href="#"
+				 style="/*display: inline-block;position: absolute;*/right: 0;padding: 0;/*margin-right: 0;justify-content: center;*/"><i
+					 class="fa fa-close"></i></span>
+		</div>
+		<div style="height:0.1em;background:#00EEEE;position: absolute;bottom: .5em;width: 100%;z-index:500;"></div>
+	</nav>
+	<style>
+		@keyframes titlebar {
+			from {
+				background: initial;
+			}
+
+			to {
+				background: #00EEEE;
+			}
+		}
+
+		* {
+			-webkit-app-region: no-drag;
+			user-select: none;
+		}
+
+		nav,
+		.navbar-nav,
+		.nav-item {
+			-webkit-app-region: drag;
+		}
+
+		nav {
+			background: #00FFFF !important;
+		}
+
+		span.nav-link {
+			display: block;
+			z-index: 100;
+			color: white;
+			border-radius: 1rem 1rem 0 0;
+			margin-right: 10px;
+			line-height: 15px;
+			cursor: default;
+		}
+
+		.nav-linker.active {
+			background: #00EEEE;
+		}
+
+		span.nav-linker:hover {
+			animation: titlebar 1s;
+			animation-fill-mode: forwards;
+		}
+
+		i {
+			padding: 0;
+		}
+
+		.active {
+			position: relative;
+			background: #00EEEE;
+			border-radius: 10px 10px 0 0;
+		}
+
+		.nav-item.active:before,
+		.nav-item.active:after {
+			display: block;
+			position: absolute;
+			content: "";
+			width: 10px;
+			height: 10px;
+			background-color: #00EEEE;
+			bottom: 0px;
+		}
+
+		.nav-item.active:before {
+			left: -10px;
+		}
+
+		.nav-item.active:after {
+			right: -10px;
+		}
+
+		.nav-linker.active {
+			position: relative;
+			display: block;
+			width: 100px;
+			height: 35px;
+			line-height: 35px;
+		}
+
+		.nav-linker.act:before,
+		.nav-linker.act:after {
+			display: block;
+			position: absolute;
+			z-index: 99;
+			content: "";
+			width: 20px;
+			height: 20px;
+			border-radius: 100%;
+			background-color: #007bff;
+			bottom: 0px;
+		}
+
+		.nav-linker.act:before {
+			right: -20px;
+			clip-path: polygon(0 50%, 50% 50%,
+					/*50%*/
+					100% 100%, 0% 100%);
+		}
+
+		.nav-linker.act:after {
+			left: -20px;
+		}
+
+		li.nav-item {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+	</style>
+	<div class="cg" hidden>
+		<input type="radio" name="ch" id="p1"
+			 onclick="$('.page1').hidden=false;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=true ;"
+			 checked />
+		<label for="p1">
+
+			<!--/*启动游戏*/-->
+			<script>
+				document.write(i18n_native["@launch-game/label"]);
+			</script>
+
+
+		</label>
+		<input type="radio" name="ch" id="p2"
+			 onclick="$('.page1').hidden=true ;$('.page2').hidden=false;$('.page3').hidden=true ;$('.page4').hidden=true ;load_ver();" />
+		<label for="p2">
+			<!--/*下载Minecraft*/-->
+			<script>
+				document.write(i18n_native["@download-minecraft/label"]);
+			</script>
+		</label>
+		<input type="radio" name="ch" id="p3"
+			 onclick="$('.page1').hidden=true ;$('.page2').hidden=true ;$('.page3').hidden=false;$('.page4').hidden=true ;" />
+		<label for="p3">
+			<!--/*设置*/-->
+			<script>
+				document.write(i18n_native["@settings/label"]);
+			</script>
+		</label>
+		<input type="radio" name="ch" id="p4"
+			 onclick="$('.page1').hidden=true ;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=false;" />
+		<label for="p4">服务器配置</label>
+	</div>
+	<div class="page1 page-linker">
+		<label class="normal">
+			<!--/*Version:*/-->
+			<script>
+				document.write(i18n_native["@launch-game/version"]);
+			</script>
+		</label>
+		<select id="ver" hidden data-live-search="true">
+			<!--
+<option value="1.7.10">1.7.10</option>
+<option value="1.12.2">1.12.2</option>
+<option value="20w10a">20w10a</option>
+<option value="20wina">20w14infinite</option>
+-->
+		</select>
+		<input type="text" list="ver_list" id="ver_input" hidden />
+		<datalist id="ver_list"></datalist>
+		<br />
+		<label class="normal">
+			<!--/*Forge:*/-->
+			<script>
+				document.write(i18n_native["@launch-game/forge"]);
+			</script>
+		</label><input type="checkbox" id="forge" onchange="$('#forgechoose').hidden=!this.checked;" /><br />
+
+		<div id="forgechoose" hidden>
+			<select id="forgever">
+
+			</select>
+		</div>
+		<label class="normal">
+			<!--Optifine:-->
+			<script>
+				document.write(i18n_native["@launch-game/optifine"]);
+			</script>
+
+		</label><input type="checkbox" id="optifine" onchange="$('#optifinechoose').hidden=!this.checked;" /><br />
+		<div id="optifinechoose" hidden>
+			<select id="optifinever">
+
+			</select>
+		</div>
+		<!--
+<label>64Bit:</label><input type="checkbox" id="bit" /><br />
+-->
+		<label class="normal">
+			<!--Name:-->
+			<script>
+				document.write(i18n_native["@launch-game/player-name"]);
+			</script>
+		</label>
+		<input type="text" id="name" list="name-list" autocomplete="on" onchange="" /><br />
+		<datalist id="name-list">
+
+		</datalist>
+		<script>
+			(function () {
+				let win = require("nw.gui").Window.get();
+				//使应用最小化到托盘
+				function backgroudApp(gui) {
+					win.hide();
+				}//使应用最小化到任务栏
+				function minimizeApp(gui) {
+					win.on('minimize', function () {
+						win.removeAllListeners('minimize');
+					}); win.minimize();
+				}//最大化应用
+				function expendApp(gui) {
+					win.on('maximize', function () {
+						win.removeAllListeners('maximize');
+					}); win.maximize();
+				}//toggle窗体最小化和最大化
+				function unexpendApp(gui) {
+					win.on('restore', function () {
+						win.removeAllListeners('restore');
+					}); win.restore();
+				}
+				// document.querySelector("nav").ondblclick=expendApp;
+			})();
+			let func_datalist_name = (function () {
+				let unique = require("./lib/unique/unique.js")
+				let list = $("datalist#name-list");
+				list.innerHTML = "";
+				let list_ss = JSON.parse(localStorage['history-name']);
+				if (list_ss.includes($("input#name").value)) return;
+				let usr_arr = [{ name: $("input#name").value, type: 'offline' }, ...list_ss];
+				let usr_list = [];
+				console.log(usr_arr);
+				usr_arr = usr_arr.filter(function (_user_obj) { console.log(_user_obj.name); return (_user_obj.name !== ""); });
+				usr_list = unique(usr_arr);
+				console.log(usr_list);
+				localStorage['history-name'] = JSON.stringify(
+					usr_list
+				);
+				let array = Array.from(new Set(
+					JSON.parse(localStorage['history-name'])
+				));
+				for (let s in array) {
+					let k = document.createElement("option");
+					k.value = array[s].name;
+					k.innerHTML = array[s].type;
+					list.appendChild(k)
+				}
+				let k = document.createElement("option");
+				k.value = "...";
+				k.innerHTML = i18n_native["@launch-game/user-setting"];
+
+				list.appendChild(k)
+			});
+			$("input#name").addEventListener("change", function () {
+
+				func_datalist_name();
+
+
+			});
+			function __updated_forge() {
+				const fs = require("fs");
+				let flag = false;
+				function updated(versions_know) {
+					flag = true;
+					let aht = path.join(__minecraft, ".\\versions\\");
+					let paths = fs.readdirSync(aht);
+					let ver = $("#forgever");
+					document.querySelector("#forgever").innerHTML = "";
+					paths.forEach(function (patho) {
+						console.log(patho)
+						var _src = aht + '\\' + patho;
+						fs.stat(_src, function (err, stats) { //stats 该对象 包含文件属性
+							if (err) throw err;
+							if (stats.isDirectory() && (patho.indexOf("Forge") >= 0 || patho.indexOf("forge") >= 0) && (patho.indexOf(versions_know) >= 0)) {
+								var o = document.createElement("option")
+								o.value = patho;
+								o.innerHTML = patho;
+								ver.appendChild(o);
+								console.log(patho)
+							}
+						});
+					});
+					jQuery('#forgever').selectpicker('refresh');
+					jQuery('#forgever').selectpicker('render');
+
+
+				};
+				return updated;
+			}
+			function updated_optifine(versions_know) {
+				const fs = require("fs");
+				let aht = path.join(__minecraft, ".\\versions\\");
+				let paths = fs.readdirSync(aht);
+				let ver = $("#optifinever");
+				document.querySelector("#optifinever").innerHTML = "";
+				paths.forEach(function (patho) {
+					console.log(patho)
+					var _src = aht + '\\' + patho;
+					fs.stat(_src, function (err, stats) { //stats 该对象 包含文件属性
+						if (err) throw err;
+						if (stats.isDirectory() && (patho.indexOf("Optifine") >= 0 || patho.indexOf("optifine") >= 0) && (patho.indexOf(versions_know) >= 0)) {
+							var o = document.createElement("option")
+							o.value = patho;
+							o.innerHTML = patho;
+							ver.appendChild(o);
+							console.log(patho)
+						}
+					});
+				});
+			};
+			let updated_forge = __updated_forge()
+			$('#ver').addEventListener("change", function () {
+				updated_forge(ver_arr[$('#ver').selectedIndex]);
+				setTimeout(function () {
+					jQuery('#forgever').selectpicker('refresh');
+					jQuery('#forgever').selectpicker('render');
+				}, 250)
+			})
+			$("input#forge").addEventListener("click", function () {
+				updated_forge(ver_arr[$('#ver').selectedIndex]);
+				jQuery('#forgever').selectpicker(this.checked ? ('show') : ('hide')).selectpicker('setStyle', 'btn-sm', 'add');
+				setTimeout(function () {
+					jQuery('#forgever').selectpicker('refresh');
+					jQuery('#forgever').selectpicker('render');
+				}, 250)
+			})
+
+			$('#ver').addEventListener("change", function () {
+				updated_optifine(ver_arr[$('#ver').selectedIndex]);
+				setTimeout(function () {
+					jQuery('#optifinever').selectpicker('refresh');
+					jQuery('#optifinever').selectpicker('render');
+				}, 250)
+			})
+			$("input#optifine").addEventListener("click", function () {
+				updated_optifine(ver_arr[$('#ver').selectedIndex]);
+				jQuery('#optifinever').selectpicker(this.checked ? ('show') : ('hide')).selectpicker('setStyle', 'btn-sm', 'add');
+				setTimeout(function () {
+					jQuery('#optifinever').selectpicker('refresh');
+					jQuery('#optifinever').selectpicker('render');
+				}, 250)
+			})
+			$("input#name").onchange = function () {
+				console.log("...")
+				if (this.value == "...") {
+					this.value = "";
+					//DONE:User settings
+					$("#open-edit-user").click();
+				}
+
+			}
+			$("input#name").oninput = function () {
+				console.log("...")
+				if (this.value == "...") {
+					this.value = "";
+					//DONE:User settings
+					$("#open-edit-user").click();
+				}
+
+			}
+			func_datalist_name();
+			$("input#name").value = "hello";
+		</script>
+		<button onclick="runminecrafta(ver_arr[($('#ver').selectedIndex)]);" id="exec_minecraft" class="btn btn-primary">
+			<!--运行Minecraft-->
+			<script>
+				document.write(i18n_native["@launch-game/exec-minecraft"]);
+			</script>
+		</button>
+		<script>
+			//https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
+			window.down_d = function (num, debug) {
+				if (debug == undefined) var debug = false;
+				let Window = nw.Window;
+				Window.open("services.html", { new_instance: true }, function (win) {
+					console.log(this)
+					window.download_window = win;
+					// download_window.on("focus",function(){alert(666)});
+					download_window.ver_arr = window.ver_arr;
+					download_window.url_arr = window.url_arr;
+					download_window.d_num = num;
+					download_window.debug_judge = debug;
+					download_window.assets_root = assets_root;
+					download_window.__minecraft = __minecraft;
+				});
+			};
+			window.download_minecraft = function (version) {
+				sessionStorage.setItem("data-version", version);
+				sessionStorage.setItem("data-target", __minecraft);
+				let Window = nw.Window;
+				Window.open("services.html", { new_instance: true }, function (win) {
+
+				});
+			}
+			window.onbeforeunload = function () {
+				//window.download_window.close();
+			};
+			document.getElementById("name").value = (localStorage["username"]) ? (localStorage["username"]) : ("hello");
+			setTimeout(function () {
+
+				//".\.minecraft\versions\20w10a\20w10a-natives"
+				const cp = require('child_process')
+				const fs = require('fs')
+				const http = require('http')
+				const https = require('https')
+				const path = require('path')
+				const os = require('os');
+				(function () {
+					let ver = $("#ver");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = ver_arr[s];
+						ver.appendChild(o);
+					}
+					let lists = $("#ver_list");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = type_arr[s];
+						lists.appendChild(o);
+					}
+					setTimeout(function () {
+						jQuery("select#ver").selectpicker()
+						jQuery("select#ver").selectpicker('setStyle', 'btn-sm', 'add');
+					});
+				}
+				)();
+				if (localStorage["--flag-select"] == "native+") {
+					jQuery("select#ver").selectpicker('hide');
+
+					$("#ver_input").oninput = $("#ver_input").onkeydown = $("#ver_input").onchange = function () {
+						let lists = $("#ver_list").options;
+						for (let s = 0; s < lists.length; s++) {
+							if (lists[s].value.toLowerCase().indexOf(this.value.toLowerCase()) == -1) this.className = "inaccept";
+							else {
+								this.className = "accept";
+								if (lists[s].value.toLowerCase() == (this.value.toLowerCase())) {
+									$("#ver").selectedIndex = s;
+									console.log(s)
+								}
+
+								return;
+							}
+						}
+					};
+					$("#ver_input").onblur = function () {
+						let lists = $("#ver_list").options;
+						for (let s = 0; s < lists.length; s++) {
+							if (lists[s].value.toLowerCase() !== (this.value.toLowerCase())) this.className = "inaccept";
+							else {
+								$("#ver").selectedIndex = s;
+								this.className = "";
+								return;
+							}
+						}
+					}
+				}
+
+
+				window.force_ver = function () {
+					let ver = $("#ver");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = ver_arr[s];
+						ver.appendChild(o);
+					}
+				};
+				function unique(arr) {
+					return Array.from(new Set(arr))
+				}
+				var x64 = (os.arch().indexOf("64")) > 0;
+				let java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "javaw.exe");
+				function runminecraft(num) {
+					let username = $("input#name").value;
+
+
+					console.log("Trying", num)
+					let forgename;
+					let forge = document.getElementById("forge").checked;;
+					let optifine = document.getElementById("optifine").checked;
+					let optifine_file;
+					if (optifine) optifine_file = $('#optifinever').options[$('#optifinever').selectedIndex].value;
+					if (forge) forgename = $('#forgever').options[$('#forgever').selectedIndex].value;
+					let pprim = path.join(__minecraft, ".\\libraries\\");
+
+
+					console.log(username)
+					if (!username) {
+						alert(i18n_native["@launch-game/tips/empty-player-name"]);
+					}
+					localStorage['history-name'] = JSON.stringify(
+						Array.from(new Set([{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])]))
+					);
+					let djava_library = path.join(__minecraft, `.\\versions\\${num}\\${num}-natives`);
+					let forge_json;
+					//let djava_library=path.join(__dirname,`.\\mcfiles\\natives`);
+					//.\\jre8\\bin\\javaw.exe
+					//C:\\ProgramData\\Oracle\\Java-PE\\jre1.8\\x64\\bin\\java.exe
+					if (forge) {
+						djava_library = path.join(__minecraft, `.\\versions\\${forgename}\\${forgename}-natives`);
+					}
+					let str = `"${java_path}" -Xms1024M -Xmx1024M -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow  ` +
+						` -Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true  -Djava.library.path="${djava_library}" `;
+					//alert(str)
+
+					if (1) {
+						console.log((path.join(__minecraft, `./versions/${num}/${num}.json`)))
+						var obj = {};
+						try {
+							let sufv = path.join(__minecraft, `./versions/${num}/${num}.json`);
+							obj = JSON.parse(fs.readFileSync(sufv));
+							if (forge) forge_json = JSON.parse(fs.readFileSync(path.join(__minecraft, `./versions/${forgename}/${forgename}.json`)));
+						} catch (e) { console.log(e); return; }
+						var libraries = obj.libraries;
+						console.log(libraries)
+						window.libb = [];
+						window.libbb = [];
+						window.libbbb = {};
+						window.ver_obj = obj;
+						window.forge_obj = forge_json;
+						window.artifacts = 0;
+						let local_forge_lib = [];
+						if (forge) {
+							for (let s = 0; s < forge_json.libraries.length; s++) {
+								let name_arr = forge_json.libraries[s].name.split(":");
+								local_forge_lib.push({ name: forge_json.libraries[s].name, downloads: { artifact: { path: `${name_arr[0].split(".").join("/")}/${name_arr[1]}/${name_arr[2]}/${name_arr[1]}-${name_arr[2]}.jar` } } });
+							}
+
+						}
+
+						libraries.unshift(...local_forge_lib);
+						console.log(libraries)
+						var ssssss = "";
+						console.log("Loading Libraries")
+						for (var s = 0; s < libraries.length; s++) {
+							var o = libraries[s];
+							var u, p, pprim_slow;
+							try {
+
+								if (o.downloads.artifact) {
+									p = o.downloads.artifact.path;
+									pprim_slow = path.join(pprim, p);
+									artifacts++;
+								}
+								else if (o.downloads.classifiers) {
+									if (o.downloads.classifiers["natives-windows"]) {
+										p = o.downloads.classifiers["natives-windows"].path;
+										pprim_slow = path.join(pprim, p);
+
+									}
+
+									else {
+										//o.downloads.classifiers["natives-windows"]
+
+										if (x64) {
+											p = o.downloads.classifiers["natives-windows-64"].path;
+										}
+										else {
+											p = o.downloads.classifiers["natives-windows-32"].path;
+										}
+										pprim_slow = path.join(pprim, p);
+										console.warn(pprim_slow)
+
+									}
+
+								}
+								//stra.split(/[0-9]/)
+							}
+							catch (e) { };
+
+
+							var pprim_cmp = pprim_slow.split(/[0-9]/);
+							var main_name_obj = libraries[s].name.split(":");
+							var main_name_ver = main_name_obj[main_name_obj.length - 1];
+							var main_name = main_name_obj.slice(0, main_name_obj.length - 1).join(":");
+							console.log(pprim_cmp, main_name_obj, main_name_ver)
+							if ((!libbbb[main_name])) {
+								libb.push(pprim_cmp);
+								libbb.push(pprim_slow)
+								libbbb[main_name] = ({ name: main_name, ver: main_name_ver, index: (libb.length - 1) });
+							}
+							else if (libbbb[main_name]) {
+								if (main_name_ver > libbbb[main_name].ver) {
+									libb.push(pprim_cmp);
+									libbb.push(pprim_slow);
+									libbbb[main_name] = ({ name: main_name, ver: main_name_ver, index: libbbb[main_name].index });
+									libbb.splice(libbbb[main_name].index, 1);
+									libb.splice(libbbb[main_name].index, 1);
+								}
+							}
+
+						}
+						//libbb=unique(libbb);
+						ssssss = libbb.join(";");
+						str = str.replace("obj.mainClass", ``)
+						var main_part = path.join(__minecraft, `.\\versions\\${num}\\${num}.jar`);
+						var mainclass = (forge) ? (forge_json.mainClass) : (obj.mainClass);
+						ssssss += (`;${main_part}\" ${mainclass}`);
+						ssssss += " ";
+						str += (" -cp \"" + ssssss);
+						console.log(ssssss)
+						var que = "\"";
+						if (!obj.minecraftArguments) {
+							obj.minecraftArguments = "";
+							for (var s = 0; s < obj.arguments.game.length; s++) {
+								var c = obj.arguments.game[s];
+								if (typeof obj.arguments.game[s] == "object") {
+
+									continue;
+								}
+								obj.minecraftArguments += obj.arguments.game[s];
+								obj.minecraftArguments += " ";
+							}
+							if (forge) {
+								for (var s = 0; s < forge_json.arguments.game.length; s++) {
+									obj.minecraftArguments += forge_json.arguments.game[s];
+									obj.minecraftArguments += " ";
+								}
+							}
+							console.log(obj.minecraftArguments)
+						}
+						else {
+							obj.minecraftArguments += (" ");
+						}
+						var version_name = (forge) ? (forgename) : (obj.id);
+						var minecraftArguments = obj.minecraftArguments
+							.replace("${auth_player_name}", que + username + que)
+							.replace("${version_name}", que + version_name + que)
+							.replace("${version_type}", que + launcher.name + launcher.version + que)
+							.replace("${game_directory}", que + __minecraft + que)
+							.replace("${assets_root}", que + (path.join(__minecraft, ".\\assets")) + que)
+							.replace("${assets_index_name}", que + obj.assets + que)
+							.replace("${auth_uuid}", que + "02f3fcd468e1b0a8048e7575c68c4733" + que)
+							.replace("${auth_access_token}", que + "02f3fcd468e1b0a8048e7575c68c4733" + que)
+							.replace("${user_properties}", que + "{}" + que)
+							.replace("${user_type}", que + "Legacy" + que)
+							.replace("${launcher_name}", que + launcher.name + que)
+							.replace("${launcher_version}", que + launcher.version + que)
+							.replace("${classpath}", "")
+						str += minecraftArguments;
+					}
+					//alert(str)
+
+					if (forge) str += "--tweakClass cpw.mods.fml.common.launcher.FMLTweaker";
+					console.log(str)
+					try {
+						var s = cp.execSync(str, { maxBuffer: 2048 * 2048 * 2048 * 2048 });
+						if (s) console.info(s.toString())
+					} catch (e) {
+						console.info(e.toString())
+					}
+					return str;
+				}
+
+
+
+
+				console.log(666)
+				console.log(runminecraft)
+				window.runminecrafta = runminecraft;
+				try {
+
+				} catch (e) { }
+
+
+
+			}, 1000);
+			function command_ext() {
+				let os_name = require("os").type();
+				return Object({ Windows_NT: "bat", Linux: "sh", "Darwin": "sh" })[os_name];
+			}
+			document.querySelector("#exec_minecraft").onclick = function () {
+				let forge = $("input#forge").checked;
+				let optifine = $("input#optifine").checked;
+				//-Dlog4j2.formatMsgNoLookups=true
+				//准备0.1G=102.4MB内存空间
+				let os = require("os")
+				let fs = require("fs")
+				let Avaliable_Memory = Math.round(os.freemem() / 1024 / 1024 * 10) / 10;//MB
+				console.log("Avaliable Memory:", Avaliable_Memory, "MB")
+				console.log("Minecraft Memory:", Math.round((Avaliable_Memory - 102.4) * 10) / 10, "MB")
+				let Use_Memory = Math.round(Avaliable_Memory - 102.4);
+				let _bit = JSON.parse(require("child_process").execSync("sysbit.exe")).bit
+				let x64 = _bit == "64";
+				const java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "java.exe");
+
+				let username = document.querySelector("input#name").value;
+				if (!username) {
+					alert(i18n_native["@launch-game/tips/empty-player-name"]);
+					return;
+				}
+				console.log("[LAUNCHING PART] SETTING USER NAME:" + username)
+				localStorage["username"] = username;
+				/*
+				let worker=new Worker("./launch-cnf.js");
+				worker.postMessage(JSON.stringify({
+				localStorage:localStorage,
+				version:ver_arr[($('#ver').selectedIndex)],
+				username:document.getElementById("name").value
+				}));
+				*/
+				const launch = require("./new-launch.js").v2;
+				localStorage['history-name'] = JSON.stringify(
+					Array.from(new Set([{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])]))
+				);
+				let usr_arr = [{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])];
+				let usr_list = [];
+				for (let s in usr_arr) usr_list.push(JSON.stringify(usr_arr[s]));
+				usr_list = Array.from(new Set(usr_list));
+
+				for (let s in usr_list) usr_list[s] = (JSON.parse(usr_list[s]));
+				console.log(usr_list);
+				localStorage['history-name'] = JSON.stringify(
+					usr_list
+				);
+				let version_minecraft;
+				if (localStorage["--flag-select"] == "native+") {
+					version_minecraft = ($('#ver_input').value) ? ($('#ver_input').value) : (ver_arr[($('#ver').selectedIndex)]);
+				}
+				else {
+					version_minecraft = ver_arr[($('#ver').selectedIndex)];
+				}
+				if (forge) version_minecraft = $("#forgever").options[$("#forgever").selectedIndex].value;
+				if (optifine) version_minecraft = $("#optifinever").options[$("#optifinever").selectedIndex].value;
+				console.log(username)
+				let args = launch({
+					java_path: java_path,
+					'.minecraft': __minecraft,
+					"version": version_minecraft,
+					settings: {
+						username: username
+					},
+					memory: {
+						max: Use_Memory + "M"
+					}
+				});
+
+				fs.writeFile(path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`), `@echo off
+${args}`, function () {
+					if (localStorage["--flag-no-window"]);
+					else {
+						let cp_worker = new Worker("./cp.js");
+						console.log("Use the safer command:", `start cmd.exe /C \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`)
+						cp_worker.postMessage(`start "Convenient MCLv1.8 - Command Prompt - ${version_minecraft}" \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`);
+					}
+				});
+				console.log(args);
+				if (localStorage["--flag-no-window"]) {
+					let cp_worker = new Worker("./cp.js");
+					cp_worker.postMessage(args);
+				}
+
+			}
+
+		</script>
+	</div>
+	<div class="page2 page-linker" hidden>
+		<style>
+			.icon {
+				width: 5em;
+				height: 5em;
+				float: left;
+			}
+
+			.icon-bookshelf {
+				background: url(assets/bookshelf.png);
+				background-size: contain;
+			}
+
+			.icon-furnace {
+				background: url(assets/furnace.png);
+				background-size: contain;
+			}
+
+			.icon-grass {
+				background: url(assets/grass.png);
+				background-size: contain;
+			}
+
+			.msg {
+				/*top:1.5em;*/
+				margin-left: 5em;
+				font-size: 1.5em;
+			}
+
+			.x {
+				clear: both;
+				height: 5em;
+			}
+
+			.x:hover,
+			.msg:hover {
+				background: rgb(28, 198, 234);
+			}
+
+			/*
+	datalist    
+	-webkit-appearance: menulist;
+	
+	
+	
+	
+	input list=>id list
+	
+	datalist id =>select
+	*/
+		</style>
+		<h1>
+			<!--下载Minecraft：-->
+			<script>
+				document.write(i18n_native["@download-minecraft/label"]);
+			</script>
+		</h1>
+		<div style='position:absolute;width:33%;height:33%;top:33%;left:33%;filter:alpha(Opacity=80);-moz-opacity:0.5;opacity: 0.5;border:1px solid #111111;border-radius:10px;overflow: scroll;'
+			 id="dialoga" hidden>
+			<span>
+				<!--下载-->
+				<script>
+					document.write(i18n_native["@download-minecraft/download-label"]);
+				</script>
+			</span><span id="ver_set_span"></span><span
+				 style="display:inline-block;position:absolute;right:0;color:white;"
+				 onclick="this.parentNode.hidden=true;">&times;</span>
+			<br />
+			<div class="ver_set_div">
+				&nbsp;&nbsp;&nbsp;
+				<!--客户端:-->
+				<script>
+					document.write(i18n_native["@download-minecraft/client-label"]);
+				</script>
+				<label class="checkbox">
+					<input type="checkbox" class="checkbox" id="client_download_confirm" />
+				</label>
+			</div>
+			<div class="ver_set_div">
+				&nbsp;&nbsp;&nbsp;
+				<!--服务端:-->
+
+				<script>
+					document.write(i18n_native["@download-minecraft/server-label"]);
+				</script>
+				<label class="checkbox">
+					<input type="checkbox" class="checkbox" id="server_download_confirm"
+						 onchange="$('#server_downloading').hidden=!$('#server_download_confirm').checked;" />
+				</label>
+
+
+			</div>
+			<div style="display:block;display:flex;justify-content: center;align-items: center;">
+				<progress id="server_downloading" min="0" max="100" hidden></progress>
+			</div>
+
+
+			<div class="ver_set_div">
+				Optifine:
+				<label class="checkbox">
+					<input type="checkbox" class="checkbox" />
+				</label>
+			</div>
+			<div class="ver_set_div">
+				&nbsp;&nbsp;&nbsp;&nbsp;Forge:
+				<label class="checkbox">
+					<input type="checkbox" class="checkbox"
+						 onclick="this.checked&&forge_tip();$('#forge_download_fetch').hidden=!this.checked;$('#forge_downloading').hidden=!this.checked"
+						 checked="false" id="forge_checked_choose_download" />
+				</label>
+			</div>
+			<div style="display:block;display:flex;justify-content: center;align-items: center;overflow: scroll;">
+				<select id="forge_download_fetch" hidden>
+
+				</select>
+				<br />
+				<progress id="forge_downloading" min="0" max="100" hidden></progress>
+				<script>
+					$('#forge_checked_choose_download').checked = "";
+
+					function forge_tip() {
+						let mirror_url = localStorage["api"] == "bmcl" ? "https://bmclapi2.bangbang93.com" : "https://download.mcbbs.net"
+						let set = [];
+						let forge_download_ver = $("#forge_download_fetch")
+						fetch(mirror_url + "/forge/minecraft/" + ver_arr[window["dlg_ver"]]).then(res => res.json()).then(function (obj) {
+							console.log(obj)
+							for (let s = 0; s < obj.length; s++) {
+								var o = document.createElement("option")
+								o.value = obj[s].version;
+								o.innerHTML = obj[s].version;
+								o["dataset"].url = `${mirror_url}/forge/download?mcversion=${obj[s].mcversion}&version=${obj[s].version}&category=installer&format=jar`;
+								o["dataset"].ver = obj[s].version;
+								o["dataset"].mcver = obj[s].mcversion;
+								//https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
+								forge_download_ver.appendChild(o);
+							}
+
+						});
+					};
+				</script>
+			</div>
+			<button style="position: absolute;left: 40%;right: 40%;width:20%;border-radius:10px;min-width: 200px;"
+				 id="rsdownload" class="btn btn-primary">开始下载</button>
+		</div>
+
+		<style>
+			.ver_set_div {
+				/* flex使其水平垂直居中的方法：必须在父容器设置，且必须是100vh*/
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			label.checkbox {
+				width: 50px;
+				height: 25px;
+				border-radius: 12px;
+				background-color: gainsboro;
+				position: relative;
+				overflow: hidden;
+				/*去除在before里面溢出的部分*/
+			}
+
+			label.checkbox input.checkbox::after {
+				content: "";
+				visibility: visible;
+				width: 20px;
+				height: 20px;
+				border-radius: 100%;
+				background-color: white;
+				position: absolute;
+				left: 2px;
+				top: 2px;
+				transition: all 0.2s;
+			}
+
+			label.checkbox input.checkbox {
+				visibility: hidden;
+				/*隐藏多选框*/
+			}
+
+			label.checkbox input.checkbox::before {
+				content: "";
+				visibility: visible;
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				transition: all 0.2s;
+			}
+
+			label.checkbox input.checkbox:checked::before {
+				background-color: green;
+				/*改变背景色*/
+			}
+
+			label.checkbox input.checkbox:checked::after {
+				transform: translateX(25px);
+			}
+
+			#server_downloading:before {
+				display: block;
+			}
+
+			.process {
+				background: red;
+				position: absolute;
+				z-index: 100;
+				width: 300px;
+				height: 10px;
+			}
+
+			#links {
+				width: 100%;
+				height: 60vh;
+				z-index: 100;
+				overflow: scroll;
+			}
+
+			label.normal {
+				width: 200px;
+				display: inline-block;
+			}
+
+			label.width2 {
+				width: 250px;
+				display: inline-block;
+			}
+
+			.pic-btn {
+				width: 3em;
+				height: 3em;
+				padding: 0;
+				margin: 0;
+				border-radius: 100%;
+			}
+		</style>
+		<div class="process" hidden>
+			<process value="0" max="100" style="width:100px;display:none;"></process>
+		</div>
+		<input type="text" id="query_ver" list="ver_list" />
+		<button
+			 onclick="let opq={mcbbs:2,mojang:1,bmcl:0,local:1};download_json(opq[localStorage['api']]);location.reload();">更新文件</button><br />
+		<div style="color:white" id="versionlist">
+
+			<script>
+				window.global_error = [];
+				process.on('uncaughtException', function (err) {
+					global_error.push(err)
+					console.error(err);//直接捕获method()未定义函数，Node进程未被退出。
+					return false;
+				});
+				(function () {
+
+					window.load_ver = function () {
+						(function () {
+							window.ver_down = $("#links");
+							if (ver_down.loada == true) return;
+							else ver_down.loada = true;
+
+							for (var s = 0; s < ver_arr.length; s++) {
+								setTimeout(function (ss) {
+									var oo = document.createElement("div");
+									oo.className = "x";
+									let ppp = document.createElement("div");
+									if (window.type_arr[ss] == "snapshot")
+										ppp.className = "icon icon-furnace";
+									else if (window.type_arr[ss] == "release")
+										ppp.className = "icon icon-grass";
+									else ppp.className = "icon icon-bookshelf";
+									let o = document.createElement("div");
+									o.href = "#" + ss;
+									oo.onclick = new Function(`
+$("#dialoga").hidden=false;
+$("#ver_set_span").innerHTML=ver_arr[${ss}];
+$("#rsdownload").onclick=function(){
+if($("#client_download_confirm").checked)down_d(${ss});
+if($("#server_download_confirm").checked)download_server(${ss});
+if($("#forge_checked_choose_download").checked)window.download_forge();
+};
+window.dlg_ver=${ss};
+`);
+									o.innerHTML = ver_arr[ss];
+									oo.appendChild(ppp);
+									oo.appendChild(o);
+									oo.style.margin = 0;
+
+									ver_down.appendChild(oo);
+
+									if (ver_arr[ss] == "20w10a") console.log(o)
+								}, 1 * s, s);
+							}
+						})();
+					};
+				})()
+				$("#query_ver").onchange = function () {
+					(function () {
+						var that = $("#query_ver");
+						var active;
+						if (that.value) active = true;
+						for (var s = 0; s < ver_arr.length; s++) {
+							if (!active) { ver_down.children[s].hidden = false; continue; }
+							if (ver_down.children[s].tagName.toLowerCase() == "br") { ver_down.children[s].hidden = false; continue; }
+							if (ver_down.children[s].innerHTML.indexOf(that.value) >= 0) {
+								ver_down.children[s].hidden = false;
+							}
+							else
+								ver_down.children[s].hidden = true;
+						}
+					})();
+				};
+				setTimeout(function () {
+					const fs = require('fs');
+					const https = require('https')
+					const path = require('path')
+					const os = require('os')
+					const dirs = require("./lib/dirs/index")
+					window.d_lib_list = {};
+					const old_window = {};
+					old_window.load_ver = function () {
+						(function () {
+							window.ver_down = $("#links");
+							if (ver_down.loada == true) return;
+							else ver_down.loada = true;
+
+							for (var s = 0; s < ver_arr.length; s++) {
+								setTimeout(function (ss) {
+									var oo = document.createElement("p");
+									var o = document.createElement("a");
+									o.href = "#" + ss;
+									o.onclick = new Function(`
+$("#dialoga").hidden=false;
+$("#ver_set_span").innerHTML=ver_arr[${ss}];
+$("#rsdownload").onclick=function(){
+	if($("#client_download_confirm").checked)down_d(${ss});
+	if($("#server_download_confirm").checked)download_server(${ss});
+	if($("#forge_checked_choose_download").checked)window.download_forge();
+};
+window.dlg_ver=${ss};
+`);
+									o.innerHTML = ver_arr[ss];
+									oo.appendChild(o);
+									oo.style.margin = 0;
+
+									ver_down.appendChild(oo);
+								}, 1 * s, s);
+							}
+						})();
+					};
+					function copy_natives(obj) {
+						try {
+							dirs.copy_dirs(path.join(__dirname, "./mcfiles/natives"), path.join(__dirname, `./mcfiles/.minecraft/versions/${obj.id}/${obj.id}-natives`));
+						} catch (e) {
+							console.log(e);
+							copy_natives(obj);
+						}
+
+					}
+					function push_log(logs) {
+						window.download_log = $("#logs");
+						download_log.innerHTML += (logs);
+					}
+					//load_ver();
+					window.download_json = function (num, urls) {
+						//http://hostker.bmclapi.933.moe:4000/download/ebf4db522bbf78b88253d045955675c7?name=version_manifest.json
+						//https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+						/*
+						https://launchermeta.mojang.com/mc/game/version_manifest.json
+						https://bmclapi2.bangbang93.com/mc/game/version_manifest.json
+						https://download.mcbbs.net/mc/game/version_manifest.json
+						*/
+						let url_list = ["https://bmclapi2.bangbang93.com/mc/game/version_manifest.json",
+							"https://launchermeta.mojang.com/mc/game/version_manifest.json",
+							"ps://download.mcbbs.net/mc/game/version_manifest.json"];
+						urls = urls ? urls : url_list[num];
+						(fetch(urls).then(vu => vu.json()).then(function (objs) { console.log(objs); fs.writeFileSync(path.join(__dirname, "./mcfiles/mojang_versions.json"), JSON.stringify(objs)); }));
+
+					}
+				}, 1000);
+			</script>
+			<div id="links">
+				<!--
+<a href="#0" onclick="d(0);">1.6.4</a><br />
+<a href="#1" onclick="d(1);">1.7.2</a><br />
+<a href="#2" onclick="d(2);">1.7.4</a><br />
+<a href="#3" onclick="d(3);">1.7.5</a><br />
+<a href="#4" onclick="d(4);">1.7.6</a><br />
+<a href="#5" onclick="d(5);">1.7.7</a><br />
+<a href="#6" onclick="d(6);">1.7.8</a><br />
+<a href="#7" onclick="d(7);">1.7.9</a><br />
+<a href="#8" onclick="global.d(8);">1.7.10</a>
+-->
+			</div>
+			<div id="logs"></div>
+		</div>
+	</div>
+	<div class="page3 page-linker" hidden style="flex: 1;">
+		<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+			<symbol id="bootstrap" viewBox="0 0 118 94">
+				<title>Bootstrap</title>
+				<path fill-rule="evenodd" clip-rule="evenodd"
+					 d="M24.509 0c-6.733 0-11.715 5.893-11.492 12.284.214 6.14-.064 14.092-2.066 20.577C8.943 39.365 5.547 43.485 0 44.014v5.972c5.547.529 8.943 4.649 10.951 11.153 2.002 6.485 2.28 14.437 2.066 20.577C12.794 88.106 17.776 94 24.51 94H93.5c6.733 0 11.714-5.893 11.491-12.284-.214-6.14.064-14.092 2.066-20.577 2.009-6.504 5.396-10.624 10.943-11.153v-5.972c-5.547-.529-8.934-4.649-10.943-11.153-2.002-6.484-2.28-14.437-2.066-20.577C105.214 5.894 100.233 0 93.5 0H24.508zM80 57.863C80 66.663 73.436 72 62.543 72H44a2 2 0 01-2-2V24a2 2 0 012-2h18.437c9.083 0 15.044 4.92 15.044 12.474 0 5.302-4.01 10.049-9.119 10.88v.277C75.317 46.394 80 51.21 80 57.863zM60.521 28.34H49.948v14.934h8.905c6.884 0 10.68-2.772 10.68-7.727 0-4.643-3.264-7.207-9.012-7.207zM49.948 49.2v16.458H60.91c7.167 0 10.964-2.876 10.964-8.281 0-5.406-3.903-8.178-11.425-8.178H49.948z">
+				</path>
+			</symbol>
+			<symbol id="home" viewBox="0 0 16 16">
+				<path
+					 d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5z" />
+			</symbol>
+			<symbol id="speedometer2" viewBox="0 0 16 16">
+				<path
+					 d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z" />
+				<path fill-rule="evenodd"
+					 d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A7.988 7.988 0 0 1 0 10zm8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3z" />
+			</symbol>
+			<symbol id="table" viewBox="0 0 16 16">
+				<path
+					 d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z" />
+			</symbol>
+			<symbol id="people-circle" viewBox="0 0 16 16">
+				<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+				<path fill-rule="evenodd"
+					 d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+			</symbol>
+			<symbol id="grid" viewBox="0 0 16 16">
+				<path
+					 d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z" />
+			</symbol>
+			<symbol id="collection" viewBox="0 0 16 16">
+				<path
+					 d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5A.5.5 0 0 1 1 13V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z" />
+			</symbol>
+			<symbol id="calendar3" viewBox="0 0 16 16">
+				<path
+					 d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z" />
+				<path
+					 d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+			</symbol>
+			<symbol id="chat-quote-fill" viewBox="0 0 16 16">
+				<path
+					 d="M16 8c0 3.866-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.584.296-1.925.864-4.181 1.234-.2.032-.352-.176-.273-.362.354-.836.674-1.95.77-2.966C.744 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7zM7.194 6.766a1.688 1.688 0 0 0-.227-.272 1.467 1.467 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 5.734 6C4.776 6 4 6.746 4 7.667c0 .92.776 1.666 1.734 1.666.343 0 .662-.095.931-.26-.137.389-.39.804-.81 1.22a.405.405 0 0 0 .011.59c.173.16.447.155.614-.01 1.334-1.329 1.37-2.758.941-3.706a2.461 2.461 0 0 0-.227-.4zM11 9.073c-.136.389-.39.804-.81 1.22a.405.405 0 0 0 .012.59c.172.16.446.155.613-.01 1.334-1.329 1.37-2.758.942-3.706a2.466 2.466 0 0 0-.228-.4 1.686 1.686 0 0 0-.227-.273 1.466 1.466 0 0 0-.469-.324l-.008-.004A1.785 1.785 0 0 0 10.07 6c-.957 0-1.734.746-1.734 1.667 0 .92.777 1.666 1.734 1.666.343 0 .662-.095.931-.26z" />
+			</symbol>
+			<symbol id="cpu-fill" viewBox="0 0 16 16">
+				<path d="M6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z" />
+				<path
+					 d="M5.5.5a.5.5 0 0 0-1 0V2A2.5 2.5 0 0 0 2 4.5H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2v1H.5a.5.5 0 0 0 0 1H2A2.5 2.5 0 0 0 4.5 14v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14h1v1.5a.5.5 0 0 0 1 0V14a2.5 2.5 0 0 0 2.5-2.5h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14v-1h1.5a.5.5 0 0 0 0-1H14A2.5 2.5 0 0 0 11.5 2V.5a.5.5 0 0 0-1 0V2h-1V.5a.5.5 0 0 0-1 0V2h-1V.5a.5.5 0 0 0-1 0V2h-1V.5zm1 4.5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3A1.5 1.5 0 0 1 6.5 5z" />
+			</symbol>
+			<symbol id="gear-fill" viewBox="0 0 16 16">
+				<path
+					 d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+			</symbol>
+			<symbol id="speedometer" viewBox="0 0 16 16">
+				<path
+					 d="M8 2a.5.5 0 0 1 .5.5V4a.5.5 0 0 1-1 0V2.5A.5.5 0 0 1 8 2zM3.732 3.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 8a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 8zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 7.31A.91.91 0 1 0 8.85 8.569l3.434-4.297a.389.389 0 0 0-.029-.518z" />
+				<path fill-rule="evenodd"
+					 d="M6.664 15.889A8 8 0 1 1 9.336.11a8 8 0 0 1-2.672 15.78zm-4.665-4.283A11.945 11.945 0 0 1 8 10c2.186 0 4.236.585 6.001 1.606a7 7 0 1 0-12.002 0z" />
+			</symbol>
+			<symbol id="toggles2" viewBox="0 0 16 16">
+				<path d="M9.465 10H12a2 2 0 1 1 0 4H9.465c.34-.588.535-1.271.535-2 0-.729-.195-1.412-.535-2z" />
+				<path
+					 d="M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm.535-10a3.975 3.975 0 0 1-.409-1H4a1 1 0 0 1 0-2h2.126c.091-.355.23-.69.41-1H4a2 2 0 1 0 0 4h2.535z" />
+				<path d="M14 4a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" />
+			</symbol>
+			<symbol id="tools" viewBox="0 0 16 16">
+				<path
+					 d="M1 0L0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.356 3.356a1 1 0 0 0 1.414 0l1.586-1.586a1 1 0 0 0 0-1.414l-3.356-3.356a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3c0-.269-.035-.53-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814L1 0zm9.646 10.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708zM3 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026L3 11z" />
+			</symbol>
+			<symbol id="chevron-right" viewBox="0 0 16 16">
+				<path fill-rule="evenodd"
+					 d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+			</symbol>
+			<symbol id="geo-fill" viewBox="0 0 16 16">
+				<path fill-rule="evenodd"
+					 d="M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z" />
+			</symbol>
+		</svg>
+		<main style="height: 100%;">
+			<div class="d-flex flex-column flex-shrink-0 p-3 bg-light"
+				 style="margin: 0;padding: 0;width: 280px;height: 100vh;float: left;">
+
+				<ul class="nav nav-pills flex-column mb-auto">
+					<li class="nav-item">
+						<a href="#" class="nav-link active" aria-current="page">
+							<svg class="bi me-2" width="16" height="16" style="margin-right:0.6rem;">
+								<use xlink:href="#home" />
+							</svg>
+							启动器设置
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link link-dark">
+							<i class="fa fa-cloud" style="margin-right:0.65rem;"></i>下载器设置
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link link-dark">
+							<i class="fa fa-gamepad" style="margin-right:0.7rem;"></i>游戏设置
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="#" class="nav-link link-dark">
+							<svg class="bi me-2" width="16" height="16" style="margin-right:0.65rem;">
+								<use xlink:href="#grid" />
+							</svg>
+							JVM设置
+						</a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="b-example-divider"></div>
+			<div>
+				<h1>
+					<!--设置-->
+					<script>
+						document.write(i18n_native["@settings/label"]);
+					</script>
+				</h1>
+				<label>
+					<!--版本查找：-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/label"]);
+					</script>
+				</label>
+				<style>
+					input[id*=custom] {
+						width: 50%;
+					}
+
+					#customsetting {
+						width: 100%;
+					}
+				</style>
+				<input type="radio" name="ver" id="ver1"
+					 onclick="if(confirm('是否设置镜像源为本地？')){localStorage['api']='local';location.reload();}" /><label
+					 for="ver1">
+					<!--本地-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/local"]);
+					</script>
+				</label>
+				<input type="radio" name="ver" id="ver2"
+					 onclick="if(confirm('是否设置镜像源为官方？')){localStorage['api']='mojang';location.reload();}" /><label
+					 for="ver2">
+					<!--官方镜像-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/mojang"]);
+					</script>
+				</label>
+				<input type="radio" name="ver" id="ver3"
+					 onclick="if(confirm('是否设置镜像源为BMCL？')){localStorage['api']='bmcl';location.reload();}" /><label
+					 for="ver3">
+					<!--BMCL镜像-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/bmclapi"]);
+					</script>
+				</label>
+				<input type="radio" name="ver" id="ver4"
+					 onclick="if(confirm('是否设置镜像源为MCBBS？')){localStorage['api']='mcbbs';location.reload();}" /><label
+					 for="ver4">
+					<!--MCBBS镜像(推荐)-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/mcbbs"]);
+					</script>
+				</label>
+				<input type="radio" name="ver" id="ver5"
+					 onclick="if(confirm('是否设置镜像源为自定义？')){localStorage['api']='custom';$('#customsetting').hidden=false;}" /><label
+					 for="ver5">
+					<!--自定义下载源-->
+					<script>
+						document.write(i18n_native["@settings/mirrors/custom"]);
+					</script>
+				</label>
+				<div id="customsetting" hidden>
+					自定义设置：<br />
+					<span style="width:5%;display:inline-block;">Assets:</span><input type="text" id="custom_assets"
+						 onchange="localStorage['--config-api-assets']=this.value;" />
+					<br />
+					<span style="width:5%;display:inline-block;">LIBRARIES:</span><input type="text"
+						 id="custom_libraries" onchange="localStorage['--config-api-libraries']=this.value;" />
+					<br />
+					<span style="width:5%;display:inline-block;">Files:</span><input type="text" id="custom_files"
+						 onchange="localStorage['--config-api-files']=this.value;" />
+					<br />
+					<span style="width:5%;display:inline-block;">Main:</span><input type="text" id="custom_main"
+						 onchange="localStorage['config-api-main']=this.value;" />
+					<br />
+					<span style="width:5%;display:inline-block;">JSON:</span><input type="text" id="custom_json"
+						 onchange="localStorage['config-api-json']=this.value;" />
+				</div>
+				<br />
+				下载等待时间(ms):<input type="number" id="custom_wait" onchange="localStorage['wait']=this.value;" />
+				<br />
+				多线程数量(0为无限制)：<input type="number" id="multi_count" onchange="localStorage['multi_count']=this.value;" />
+				<br />
+				<a onclick="window.download_json(1);" href="#">下载官方镜像JSON</a>
+				<a onclick="window.download_json(0);" href="#">下载BMCL镜像JSON</a>
+				<a onclick="force_ver();" href="#">强制加载版本</a>
+				<a onclick="r();" href="#">重新加载网页</a>
+				<a onclick="restart();" href="#">重启</a>
+			</div>
+		</main>
+	</div>
+	<div class="page4" hidden>
+		<button onclick="create_new_server();">新建服务器</button>
+		<div style='position:absolute;width:33%;height:33%;top:33%;left:33%;filter:alpha(Opacity=80);-moz-opacity:0.5;opacity: 0.5;'
+			 id="dialogb" hidden>
+			<span>新建服务器</span>
+			<span style="display:inline-block;position:absolute;right:0;color:white;"
+				 onclick="this.parentNode.hidden=true;">&times;</span><br />
+			选择模板文件夹：<br />
+			<label class="width2">配置文件名称：</label><input type="text" id="server_add_id" /><br />
+			<label class="width2">从外部选择:</label><input id="server_build_out" type="file" nwdirectory hidden /><button
+				 onclick="$('#server_build_out').click();window.server_new_choise=1;">点此选择</button><br />
+			<label class="width2">从模板库选择:</label><select id="server_build_in"></select><br />
+			<button onclick="server_choised()">创建服务器</button>
+		</div>
+		<script>
+
+		</script>
+		<script></script>
+	</div>
+	<script src="./main-thread.js"></script>
+	<script>
+		function create_new_server() {
+			$("#dialogb").hidden = false;
+			$("#server_build_out").nwworkingdir = path.join(__dirname, "serverfiles");
+		}
+		function server_choised() {
+			if (!$("#server_add_id").value) {
+				alert("必须设置配置文件名称");
+				return false;
+			}
+			if (window["server_new_choise"] == 1) {
+				const dirs = require("./lib/dirs/index.js");
+				dirs.mkdirsSync(path.join(__dirname, "serverfiles", "actives", $("#server_add_id").value));
+				dirs.copy_dirs($("#server_build_out").files[0].path, path.join(__dirname, "serverfiles", "actives", $("#server_add_id").value));
+				try {
+					let json = JSON.parse(fs.readFileSync(path.join(__dirname, "serverfiles", "actives", $("#server_add_id").value, "manifest.json")));
+					json.name = $("#server_add_id").value;
+					console.log(json)
+					fs.writeFileSync(path.join(__dirname, "serverfiles", "actives", $("#server_add_id").value, "manifest.json"), JSON.stringify(json))
+				} catch (e) {
+
+				}
+			};
+		}
+		setTimeout(function () {
+			let versss = {
+				local: function () { $("#ver1").checked = true; },
+				mojang: function () { $("#ver2").checked = true; },
+				bmcl: function () { $("#ver3").checked = true; },
+				mcbbs: function () { $("#ver4").checked = true; },
+				custom: function () { $("#ver5").checked = true; $('#customsetting').hidden = false; }
+			};
+			versss[localStorage['api']]();
+			$("#custom_assets").value = localStorage['--config-api-assets'];
+			$("#custom_libraries").value = localStorage['--config-api-libraries'];
+			$("#custom_files").value = localStorage['--config-api-files'];
+			$("#custom_main").value = localStorage['--config-api-main'];
+			$("#custom_json").value = localStorage['--config-api-json'];
+			$("#custom_wait").value = localStorage['wait'] ? localStorage['wait'] : 60000;
+			$("#multi_count").value = localStorage['multi_count'] ? localStorage['multi_count'] : 20;
+		});
+
+	</script>
+	<button type="button" hidden id="open-edit-user" class="btn btn-primary" data-toggle="modal"
+		 data-target="#modal-edit-user">
+		Edit User
+	</button>
+	<!-- 模态框 -->
+	<style>
+		.float-right {
+			float: right;
+		}
+
+		.inline-block {
+			display: inline-block !important;
+		}
+
+		.nothing {
+			padding: 0;
+			margin: 0;
+			display: inline-block;
+		}
+	</style>
+
+	<div class="modal fade" id="modal-add-user">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+
+				<!-- 模态框头部 -->
+				<div class="modal-header">
+					<h4 class="modal-title">
+						<script>
+							document.write(i18n_native["@launch-game/add-game-user-dialog/title"]);
+						</script>
+					</h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+				</div>
+
+				<!-- 模态框主体 -->
+				<div class="modal-body">
+					<label for="modal-add-user-username" class="normal">
+						<script>
+							document.write(i18n_native["@launch-game/add-game-user-dialog/username"]);
+						</script>
+					</label>
+					<input id="modal-add-user-username" />
+					<br />
+					<label for="modal-add-user-login-type" class="normal">
+						<script>
+							document.write(i18n_native["@launch-game/add-game-user-dialog/type"]);
+						</script>
+					</label>
+
+					<select id="modal-add-user-login-type">
+						<option>
+							<script>
+								document.write(i18n_native["@launch-game/add-game-user-dialog/online"]);
+							</script>
+						</option>
+						<option>
+							<script>
+								document.write(i18n_native["@launch-game/add-game-user-dialog/offline"]);
+							</script>
+						</option>
+						<option>
+							<script>
+								document.write(i18n_native["@launch-game/add-game-user-dialog/custom"]);
+							</script>
+						</option>
+					</select>
+				</div>
+
+				<!-- 模态框底部 -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal" id="add-game-user-dialog-ok">
+						<script>
+							document.write(i18n_native["@launch-game/add-game-user-dialog/ok"]);
+						</script>
+					</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">
+						<script>
+							document.write(i18n_native["@launch-game/add-game-user-dialog/cancel"]);
+						</script>
+					</button>
+				</div>
+				<script>
+					const login_type_table_2 = ["online", "offline", "custom"];
+					$("#add-game-user-dialog-ok").onclick = function () {
+						$("input#name").innerHTML = "";
+						let array = JSON.parse(localStorage['history-name'])
+							;
+						console.log(array);
+						console.log($("select#modal-add-user-login-type").selectedIndex)
+						array.push({ name: $("#modal-add-user-username").value, type: login_type_table_2[$("select#modal-add-user-login-type").selectedIndex] });
+						console.log("999:", array);
+						array = array.filter(function (_user_obj) { console.log(_user_obj.name); return (_user_obj.name !== ""); });
+						console.log(array);
+						let unique = require("./lib/unique/unique.js");
+						array = unique(array);
+						console.log(array);
+						localStorage['history-name'] = JSON.stringify(
+							array
+						);
+						func_datalist_name();
+						eval(`user_manage();`);
+					};
+				</script>
+			</div>
+		</div>
+	</div>
+
+	</div>
+	<div class="modal fade" id="modal-edit-user">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+
+				<!-- 模态框头部 -->
+				<div class="modal-header">
+					<h4 class="modal-title">
+						<script>
+							document.write(i18n_native["@launch-game/edit-game-user-dialog/title"]);
+						</script>
+					</h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+				</div>
+
+				<!-- 模态框主体 -->
+				<div class="modal-body" style="height:50%;">
+					<button class="pic-btn btn btn-primary" data-toggle="modal" data-target="#modal-add-user"
+						 data-dismiss="modal">+</button>
+					<div id="user-list" style="overflow: scroll;">
+
+					</div>
+					<script>
+						let user_array = [];
+						let user_list = $("#user-list");
+						function user_manage() {
+							user_list.innerHTML = "";
+							const compare_table = {
+								online: "online",
+								offline: "offline",
+								custom: "custom"
+							};
+							let usr_arr = JSON.parse(localStorage['history-name']);
+							let usr_list = [];
+							/*
+							for (let s in usr_list) usr_list[s] = (JSON.parse(usr_list[s]));
+							usr_list = usr_list.filter(function (_user_obj) { console.log(_user_obj.name); return (_user_obj.name !== ""); });
+							*/
+							let unique = require("./lib/unique/unique.js")
+							console.log(usr_arr)
+							usr_list = unique(usr_arr);
+							usr_list = usr_list.filter(function (_user_obj) { console.log(_user_obj.name); return (_user_obj.name !== ""); });
+							console.log(usr_list);
+							localStorage['history-name'] = JSON.stringify(
+								usr_list
+							);
+							let array = Array.from(new Set(
+								JSON.parse(localStorage['history-name'])
+							));
+							user_array = array;
+							for (let s in array) {
+								console.log(array[s])
+								let obj = document.createElement("div");
+								let msg = document.createElement("div");
+								msg.className = "nothing";
+								msg.display = "inline-block";
+								obj.appendChild(msg);
+								obj.style.border = "1px solid grey";
+								obj.style.borderRadius = "0.3em";
+								obj.style.width = "100%";
+								obj.style.height = "20%";
+								let username = document.createElement("span");
+								let br = document.createElement("br");
+								let type = document.createElement("span");
+								let edit = document.createElement("button");
+								let del = document.createElement("button");
+								del.dataset.id = s;
+								del.onclick = function () {
+									user_array.splice(this.dataset.id, 1);
+									localStorage['history-name'] = JSON.stringify(
+										user_array
+									);
+									$("input#name").innerHTML = "";
+									func_datalist_name();
+									user_manage();
+								}
+								del.innerHTML = `<i class="fa fa-trash"></i>`;
+								edit.innerHTML = `<i class="fa fa-edit"></i>`;
+								del.className = 'pic-btn btn btn-primary btn-success float-right inline-block';
+								edit.className = 'pic-btn btn btn-primary btn-success float-right inline-block';
+								username.innerText = i18n_native["@launch-game/edit-game-user-dialog/user-name"] + array[s].name;
+								type.innerText = i18n_native["@launch-game/edit-game-user-dialog/type"] + i18n_native["@launch-game/edit-game-user-dialog/" + compare_table[array[s].type]];
+								msg.appendChild(username);
+								msg.appendChild(br);
+								msg.appendChild(type);
+								obj.appendChild(del);
+								obj.appendChild(edit);
+								user_list.appendChild(obj);
+
+							}
+						};
+						user_manage();
+					</script>
+				</div>
+
+				<!-- 模态框底部 -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">
+						<script>
+							document.write(i18n_native["@launch-game/edit-game-user-dialog/OK"]);
+						</script>
+					</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script src="vcon.js"></script>
+	<script>
+		if (process.versions["nw-flavor"] == "normal")
+			// init vConsole
+			var vConsole = new VConsole();
+		console.log('Hello world');
+		console.log(HTMLProgressElement);
+	</script>
+	<script>
+		(function func() {
+			let arr = Array.from(document.querySelectorAll(".nav-linker"));
+			const objs = Array.from(document.querySelectorAll(".page-linker"));
+			const handler = { ".page2": load_ver };
+			for (let i in arr) {
+				arr[i].onclick = function () {
+					for (let j in objs) {
+						objs[j].hidden = true;
+						arr[j].className = "nav-link nav-linker";
+						arr[j].parentNode.className = "nav-item";
+					}
+					if (handler[this.dataset.linkPage]) handler[this.dataset.linkPage]()
+					this.className = "nav-link nav-linker act";
+					this.parentNode.className = "nav-item active"
+					document.querySelector(this.dataset.linkPage).hidden = false;
+				};
+			}
+		})()
+	</script>
+</body>
+
+</html>

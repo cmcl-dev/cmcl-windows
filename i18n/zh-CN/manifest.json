@@ -1,0 +1,5 @@
+{
+    "name":"zh-CN",
+    "show":"简体中文",
+    "files":["zh-CN.json","zh-CN.min.json"]
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+<title>JSON Format</title>
+</head>
+<body>
+<input type="file" />
+<br />
+From:<br />
+<textarea id="json-from"></textarea>
+<br />
+<button onclick="format()">Format</button>
+<br />
+To:<br />
+<pre id="json-to" contenteditable></pre>
+<br />
+
+<script>
+String.prototype.replaceAll=function(a,b){
+	var c=this;
+	while(c.indexOf(a)!==-1)
+	{
+		c=c.replace(a,b);
+	}
+	return c;
+}
+
+window.$=function(e){return document.querySelector(e);}
+$("input[type=file]").onchange=function(e){
+	let source=this;
+	var file = source.files[0];
+			if(window.FileReader) {
+				var fr = new FileReader();
+				fr.onloadend = function(e) {
+					$("#json-from").value=e.target.result;
+				};
+				fr.readAsText(file)
+			}
+/*
+https://blog.csdn.net/jackfrued/article/details/8967667
+*/
+}
+function format(){
+var obj=JSON.parse($('#json-from').value);
+var rep="\t";
+var c=(JSON.stringify(obj,0,rep));
+$('#json-to').innerHTML=c;
+console.log(c);
+}
+</script>
+</body>
+</html>

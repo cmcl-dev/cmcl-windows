@@ -1,0 +1,27 @@
+{
+  "main": "index.html",
+  "name": "cmcl-windows",
+  "dependencies": {
+    "aria2": "^4.1.2",
+    "comlink": "^4.3.1",
+    "compressing": "^1.5.1",
+    "greenlet": "^1.1.0",
+    "node-fetch": "^2.6.1",
+    "progress-stream": "^2.0.0",
+    "promising-a-stream": "^1.0.0",
+    "workerize": "^0.1.8"
+  },
+  "window": {
+    "icon": "command.png",
+    "min_width": 642,
+    "min_height": 224,
+    "width": 792,
+    "height": 454,
+    "frame": false
+  },
+  "node-main": "node-main.js",
+  "description": "demo app of node-webkit",
+  "chromium-args": "--enable-node-worker --disable-web-security",
+  "version": "1.7",
+  "crash_report_url": "http://127.0.0.1:5283"
+}

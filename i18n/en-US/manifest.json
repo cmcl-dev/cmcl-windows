@@ -1,0 +1,5 @@
+{
+    "name":"en-US",
+    "show":"English",
+    "files":["en-US.json","en-US.min.json"]
+}

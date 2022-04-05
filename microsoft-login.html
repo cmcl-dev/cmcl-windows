@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Microsoft Login</title>
+</head>
+
+<body>
+    <webview style="padding:0;margin:0;display: block;width:100vw;height:100vh;"></webview>
+    <script>
+        (function () {
+            let ffetch = function () { }
+            //let fetch=require("node-fetch")
+            let ua = "CMCL v1.8";
+            let $ = function (ele) {
+                return document.querySelector(ele);
+            }
+            function Params(ur) {
+                let chunkss = ur.split("?");
+                if (chunkss.length <= 1) return {};
+                let url2 = "?" + (chunkss[1]);
+                var rst = {};
+                var str = url2.substr(1);
+                var parts = str.split("&");
+                for (var i = 0; i < parts.length; i++) {
+                    rst[parts[i].split("=")[0]] = decodeURI(parts[i].split("=")[1]);
+                }
+                return rst;
+            }
+            //Thanks https://blog.csdn.net/Zllvincent/article/details/103258772?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-1&spm=1001.2101.3001.4242
+            window.onload = function () {
+                let view_url = "https://login.live.com/oauth20_authorize.srf?client_id=00000000402b5328&response_type=code&scope=service%3A%3Auser.auth.xboxlive.com%3A%3AMBI_SSL%20&redirect_uri=https%3A%2F%2Flogin.live.com%2Foauth20_desktop.srf";
+                let view = $("webview");
+                view.src = view_url;
+                let interval = setInterval(function () {
+                    if (view.src !== view_url && view.src !== "") {
+                        console.log(view.src)
+                        let args = Params(view.src);
+
+                        console.log("1", args);
+                        if (window.opener !== window) {
+                            window.opener.postMessage({ type: "login", args: args });
+                            chrome.cookies.getAll({
+                                url: $("webview").src
+                            },
+                                function (objs) {
+                                    for (let s in objs) {
+                                        console.log(objs[s])
+                                        chrome.cookies.remove({
+                                            url: $("webview").src,
+                                            name: objs[s].name
+                                        },
+                                            function () { });
+                                    }
+                                })
+                            let xbl_token, uhs_token, xsts_token;
+                            let params1 = new URLSearchParams({
+                                "client_id": "00000000402b5328",
+                                "code": args.code, // 第一步中获取的代码
+                                "grant_type": "authorization_code",
+                                "redirect_uri": "https://login.live.com/oauth20_desktop.srf",
+                                "scope": "service::user.auth.xboxlive.com::MBI_SSL"
+                            });
+                            fetch("https://login.live.com/oauth20_token.srf", {
+                                body: params1.toString(), // must match 'Content-Type' header
+                                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                                credentials: 'same-origin', // include, same-origin, *omit
+                                headers: {
+                                    'user-agent': ua,
+                                    'content-type': 'application/x-www-form-urlencoded'
+                                },
+                                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                                redirect: 'follow', // manual, *follow, error
+                                referrer: 'no-referrer', // *client, no-referrer
+                            })
+                                .then(response => response.json())
+                                .then(function (args) {
+                                    console.log(args);
+                                    let params2 = JSON.stringify({
+                                        "Properties": {
+                                            "AuthMethod": "RPS",
+                                            "SiteName": "user.auth.xboxlive.com",
+                                            "RpsTicket": args.access_token // 第二步中获取的访问令牌
+                                        },
+                                        "RelyingParty": "http://auth.xboxlive.com",
+                                        "TokenType": "JWT"
+                                    });
+                                    return fetch("https://user.auth.xboxlive.com/user/authenticate", {
+                                        body: params2.toString(), // must match 'Content-Type' header
+                                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                                        credentials: 'same-origin', // include, same-origin, *omit
+                                        headers: {
+                                            'user-agent': ua,
+                                            'content-type': 'application/json'
+                                        },
+                                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                                        redirect: 'follow', // manual, *follow, error
+                                        referrer: 'no-referrer', // *client, no-referrer
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(function (args) {
+                                    console.log(args)
+                                    xbl_token = args.Token;
+                                    let params3 = JSON.stringify({
+                                        "Properties": {
+                                            "SandboxId": "RETAIL",
+                                            "UserTokens": [
+                                                xbl_token
+                                            ]
+                                        },
+                                        "RelyingParty": "rp://api.minecraftservices.com/",
+                                        "TokenType": "JWT"
+                                    });
+                                    return fetch("https://xsts.auth.xboxlive.com/xsts/authorize", {
+                                        body: params3.toString(), // must match 'Content-Type' header
+                                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                                        credentials: 'same-origin', // include, same-origin, *omit
+                                        headers: {
+                                            'user-agent': ua,
+                                            'content-type': 'application/json'
+                                        },
+                                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                                        redirect: 'follow', // manual, *follow, error
+                                        referrer: 'no-referrer', // *client, no-referrer
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(function (args) {
+                                    console.log(args)
+                                    uhs_token = args.DisplayClaims.xui[0].uhs;
+                                    xsts_token = args.Token;
+                                    let params3 = JSON.stringify({
+                                        "identityToken": `XBL3.0 x=${uhs_token};${xsts_token}`
+                                    });
+                                    return fetch("https://api.minecraftservices.com/authentication/login_with_xbox", {
+                                        body: params3.toString(), // must match 'Content-Type' header
+                                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                                        credentials: 'same-origin', // include, same-origin, *omit
+                                        headers: {
+                                            'user-agent': ua,
+                                            'content-type': 'application/json'
+                                        },
+                                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                                        redirect: 'follow', // manual, *follow, error
+                                        referrer: 'no-referrer', // *client, no-referrer
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(function (args) {
+                                    console.log(args)
+                                    return fetch("https://api.minecraftservices.com/entitlements/mcstore", {
+                                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                                        credentials: 'same-origin', // include, same-origin, *omit
+                                        headers: {
+                                            'user-agent': ua,
+                                            'content-type': 'application/json',
+                                            Authorization: `Bearer ${args.access_token}`
+                                        },
+                                        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                                        redirect: 'follow', // manual, *follow, error
+                                        referrer: 'no-referrer', // *client, no-referrer
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(function (args) {
+                                    console.log(args)
+                                    if (args.items.length == 0) {
+                                        alert("您并不拥有游戏");
+                                    }
+                                });
+                        }
+
+                        clearInterval(interval)
+                    }
+                }, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

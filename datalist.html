@@ -1,0 +1,26 @@
+<html><head>
+    <style>
+        input::-webkit-calendar-picker-indicator{display:none;-webkit-appearance:none;}
+    	
+    </style>
+</head><body>
+<input list="cars" style="-webkit-appearance: menulist; background: green;" id="carss">
+<datalist id="cars">
+	<option value="BMW">BMW6
+	</option><option value="Ford">
+	</option><option value="Volvo">
+</option></datalist>
+    <script> document.querySelector("input").oninput=function(){
+        let arr=["BMW","Ford","Volvo"];
+        for (let s=0;s<arr.length;s++){
+        	if(arr[s].toLowerCase().indexOf(this.value.toLowerCase())==-1)this.style.background="red";
+       		else {
+                 this.style.background="green";
+                 return;
+                 }
+        }
+    }
+    </script>
+
+
+</body></html>

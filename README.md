@@ -14,7 +14,7 @@ Step 2.Make a directory named app in the directory which contained nwjs.exe
 ### Stable Version
 Step 1.Download it from Releases.  
 Step 2.Uncompress it.  
-### Both
+### Next...
 Step 3.Double-click launch.exe.If you are a Chinese-User,change to setting page and change mirrors.  
 Step 4.Change to Downloading Page to download Minecraft.  
 Step 5.Relaunch it and launch Minecraft.

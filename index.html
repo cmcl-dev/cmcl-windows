@@ -4,6 +4,7 @@
 <head>
     <link rel="shortcut icon" type="image/png" href="command.png" />
     <script src="restart.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
     <link rel="stylesheet" href="./lib/bootstrap@4.1.3/css/bootstrap.min.css" />
     <script src="lib/bootstrap@4.1.3/js/jquery.min.js"></script>
     <script src="./lib/bootstrap-select@1.13.14/js/popper.min.js"></script>
@@ -346,117 +347,6 @@
         </div>
         <div style="height:0.1em;background:#00EEEE;position: absolute;bottom: .5em;width: 100%;z-index:500;"></div>
     </nav>
-    <style>
-        @keyframes titlebar {
-			from {
-				background: initial;
-			}
-
-			to {
-				background: #00EEEE;
-			}
-		}
-
-		* {
-			-webkit-app-region: no-drag;
-			user-select: none;
-		}
-
-		nav,
-		.navbar-nav,
-		.nav-item {
-			-webkit-app-region: drag;
-		}
-
-		nav {
-			background: #00FFFF !important;
-		}
-
-		span.nav-link {
-			display: block;
-			z-index: 100;
-			color: white;
-			border-radius: 1rem 1rem 0 0;
-			margin-right: 10px;
-			line-height: 15px;
-			cursor: default;
-		}
-
-		.nav-linker.active {
-			background: #00EEEE;
-		}
-
-		span.nav-linker:hover {
-			animation: titlebar 1s;
-			animation-fill-mode: forwards;
-		}
-
-		i {
-			padding: 0;
-		}
-
-		.active {
-			position: relative;
-			background: #00EEEE;
-			border-radius: 10px 10px 0 0;
-		}
-
-		.nav-item.active:before,
-		.nav-item.active:after {
-			display: block;
-			position: absolute;
-			content: "";
-			width: 10px;
-			height: 10px;
-			background-color: #00EEEE;
-			bottom: 0px;
-		}
-
-		.nav-item.active:before {
-			left: -10px;
-		}
-
-		.nav-item.active:after {
-			right: -10px;
-		}
-
-		.nav-linker.active {
-			position: relative;
-			display: block;
-			width: 100px;
-			height: 35px;
-			line-height: 35px;
-		}
-
-		.nav-linker.act:before,
-		.nav-linker.act:after {
-			display: block;
-			position: absolute;
-			z-index: 99;
-			content: "";
-			width: 20px;
-			height: 20px;
-			border-radius: 100%;
-			background-color: #007bff;
-			bottom: 0px;
-		}
-
-		.nav-linker.act:before {
-			right: -20px;
-			clip-path: polygon(0 50%, 50% 50%,
-					/*50%*/
-					100% 100%, 0% 100%);
-		}
-
-		.nav-linker.act:after {
-			left: -20px;
-		}
-
-		li.nav-item {
-			padding-left: 1rem;
-			padding-right: 1rem;
-		}
-	</style>
     <div class="cg" hidden>
         <input type="radio" name="ch" id="p1" onclick="$('.page1').hidden=false;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=true ;" checked />
         <label for="p1">
@@ -892,56 +782,7 @@ ${args}`, function () {
 		</script>
     </div>
     <div class="page2 page-linker" hidden>
-        <style>
-            .icon {
-				width: 5em;
-				height: 5em;
-				float: left;
-			}
-
-			.icon-bookshelf {
-				background: url(assets/bookshelf.png);
-				background-size: contain;
-			}
-
-			.icon-furnace {
-				background: url(assets/furnace.png);
-				background-size: contain;
-			}
-
-			.icon-grass {
-				background: url(assets/grass.png);
-				background-size: contain;
-			}
-
-			.msg {
-				/*top:1.5em;*/
-				margin-left: 5em;
-				font-size: 1.5em;
-			}
-
-			.x {
-				clear: both;
-				height: 5em;
-			}
-
-			.x:hover,
-			.msg:hover {
-				background: rgb(28, 198, 234);
-			}
-
-			/*
-	datalist    
-	-webkit-appearance: menulist;
-	
-	
-	
-	
-	input list=>id list
-	
-	datalist id =>select
-	*/
-		</style>
+        
         <h1>
             <!--下载Minecraft：-->
             <script>
@@ -996,125 +837,10 @@ ${args}`, function () {
                 </select>
                 <br />
                 <progress id="forge_downloading" min="0" max="100" hidden></progress>
-                <script>
-                    $('#forge_checked_choose_download').checked = "";
-
-					function forge_tip() {
-						let mirror_url = localStorage["api"] == "bmcl" ? "https://bmclapi2.bangbang93.com" : "https://download.mcbbs.net"
-						let set = [];
-						let forge_download_ver = $("#forge_download_fetch")
-						fetch(mirror_url + "/forge/minecraft/" + ver_arr[window["dlg_ver"]]).then(res => res.json()).then(function (obj) {
-							console.log(obj)
-							for (let s = 0; s < obj.length; s++) {
-								var o = document.createElement("option")
-								o.value = obj[s].version;
-								o.innerHTML = obj[s].version;
-								o["dataset"].url = `${mirror_url}/forge/download?mcversion=${obj[s].mcversion}&version=${obj[s].version}&category=installer&format=jar`;
-								o["dataset"].ver = obj[s].version;
-								o["dataset"].mcver = obj[s].mcversion;
-								//https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
-								forge_download_ver.appendChild(o);
-							}
-
-						});
-					};
-				</script>
+                <script src="./packages/dl-interface/forge.js">				</script>
             </div>
             <button style="position: absolute;left: 40%;right: 40%;width:20%;border-radius:10px;min-width: 200px;" id="rsdownload" class="btn btn-primary">开始下载</button>
         </div>
-        <style>
-            .ver_set_div {
-				/* flex使其水平垂直居中的方法：必须在父容器设置，且必须是100vh*/
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-
-			label.checkbox {
-				width: 50px;
-				height: 25px;
-				border-radius: 12px;
-				background-color: gainsboro;
-				position: relative;
-				overflow: hidden;
-				/*去除在before里面溢出的部分*/
-			}
-
-			label.checkbox input.checkbox::after {
-				content: "";
-				visibility: visible;
-				width: 20px;
-				height: 20px;
-				border-radius: 100%;
-				background-color: white;
-				position: absolute;
-				left: 2px;
-				top: 2px;
-				transition: all 0.2s;
-			}
-
-			label.checkbox input.checkbox {
-				visibility: hidden;
-				/*隐藏多选框*/
-			}
-
-			label.checkbox input.checkbox::before {
-				content: "";
-				visibility: visible;
-				width: 100%;
-				height: 100%;
-				position: absolute;
-				top: 0;
-				left: 0;
-				transition: all 0.2s;
-			}
-
-			label.checkbox input.checkbox:checked::before {
-				background-color: green;
-				/*改变背景色*/
-			}
-
-			label.checkbox input.checkbox:checked::after {
-				transform: translateX(25px);
-			}
-
-			#server_downloading:before {
-				display: block;
-			}
-
-			.process {
-				background: red;
-				position: absolute;
-				z-index: 100;
-				width: 300px;
-				height: 10px;
-			}
-
-			#links {
-				width: 100%;
-				height: 60vh;
-				z-index: 100;
-				overflow: scroll;
-			}
-
-			label.normal {
-				width: 200px;
-				display: inline-block;
-			}
-
-			label.width2 {
-				width: 250px;
-				display: inline-block;
-			}
-
-			.pic-btn {
-				width: 3em;
-				height: 3em;
-				padding: 0;
-				margin: 0;
-				border-radius: 100%;
-			}
-		</style>
         <div class="process" hidden>
             <process value="0" max="100" style="width:100px;display:none;"></process>
         </div>
@@ -1129,7 +855,6 @@ ${args}`, function () {
 					return false;
 				});
 				(function () {
-
 					window.load_ver = function () {
 						(function () {
 							window.ver_down = $("#links");
@@ -1452,9 +1177,6 @@ window.dlg_ver=${ss};
             <label class="width2">从模板库选择:</label><select id="server_build_in"></select><br />
             <button onclick="server_choised()">创建服务器</button>
         </div>
-        <script>
-        </script>
-        <script></script>
     </div>
     <script src="./main-thread.js"></script>
     <script>

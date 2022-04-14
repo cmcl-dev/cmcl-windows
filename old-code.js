@@ -280,3 +280,199 @@ global_error.push(e);
 setTimeout(function(){console.log(d)},1000);
 
 global.f3=36;
+/*803-998*/
+var x64 = (os.arch().indexOf("64")) > 0;
+				let java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "javaw.exe");
+				function runminecraft(num) {
+					let username = $("input#name").value;
+
+
+					console.log("Trying", num)
+					let forgename;
+					let forge = document.getElementById("forge").checked;;
+					let optifine = document.getElementById("optifine").checked;
+					let optifine_file;
+					if (optifine) optifine_file = $('#optifinever').options[$('#optifinever').selectedIndex].value;
+					if (forge) forgename = $('#forgever').options[$('#forgever').selectedIndex].value;
+					let pprim = path.join(__minecraft, ".\\libraries\\");
+
+
+					console.log(username)
+					if (!username) {
+						alert(i18n_native["@launch-game/tips/empty-player-name"]);
+					}
+					localStorage['history-name'] = JSON.stringify(
+						Array.from(new Set([{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])]))
+					);
+					let djava_library = path.join(__minecraft, `.\\versions\\${num}\\${num}-natives`);
+					let forge_json;
+					//let djava_library=path.join(__dirname,`.\\mcfiles\\natives`);
+					//.\\jre8\\bin\\javaw.exe
+					//C:\\ProgramData\\Oracle\\Java-PE\\jre1.8\\x64\\bin\\java.exe
+					if (forge) {
+						djava_library = path.join(__minecraft, `.\\versions\\${forgename}\\${forgename}-natives`);
+					}
+					let str = `"${java_path}" -Xms1024M -Xmx1024M -XX:+UseG1GC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow  ` +
+						` -Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true  -Djava.library.path="${djava_library}" `;
+					//alert(str)
+
+					if (1) {
+						console.log((path.join(__minecraft, `./versions/${num}/${num}.json`)))
+						var obj = {};
+						try {
+							let sufv = path.join(__minecraft, `./versions/${num}/${num}.json`);
+							obj = JSON.parse(fs.readFileSync(sufv));
+							if (forge) forge_json = JSON.parse(fs.readFileSync(path.join(__minecraft, `./versions/${forgename}/${forgename}.json`)));
+						} catch (e) { console.log(e); return; }
+						var libraries = obj.libraries;
+						console.log(libraries)
+						window.libb = [];
+						window.libbb = [];
+						window.libbbb = {};
+						window.ver_obj = obj;
+						window.forge_obj = forge_json;
+						window.artifacts = 0;
+						let local_forge_lib = [];
+						if (forge) {
+							for (let s = 0; s < forge_json.libraries.length; s++) {
+								let name_arr = forge_json.libraries[s].name.split(":");
+								local_forge_lib.push({ name: forge_json.libraries[s].name, downloads: { artifact: { path: `${name_arr[0].split(".").join("/")}/${name_arr[1]}/${name_arr[2]}/${name_arr[1]}-${name_arr[2]}.jar` } } });
+							}
+
+						}
+
+						libraries.unshift(...local_forge_lib);
+						console.log(libraries)
+						var ssssss = "";
+						console.log("Loading Libraries")
+						for (var s = 0; s < libraries.length; s++) {
+							var o = libraries[s];
+							var u, p, pprim_slow;
+							try {
+
+								if (o.downloads.artifact) {
+									p = o.downloads.artifact.path;
+									pprim_slow = path.join(pprim, p);
+									artifacts++;
+								}
+								else if (o.downloads.classifiers) {
+									if (o.downloads.classifiers["natives-windows"]) {
+										p = o.downloads.classifiers["natives-windows"].path;
+										pprim_slow = path.join(pprim, p);
+
+									}
+
+									else {
+										//o.downloads.classifiers["natives-windows"]
+
+										if (x64) {
+											p = o.downloads.classifiers["natives-windows-64"].path;
+										}
+										else {
+											p = o.downloads.classifiers["natives-windows-32"].path;
+										}
+										pprim_slow = path.join(pprim, p);
+										console.warn(pprim_slow)
+
+									}
+
+								}
+								//stra.split(/[0-9]/)
+							}
+							catch (e) { };
+
+
+							var pprim_cmp = pprim_slow.split(/[0-9]/);
+							var main_name_obj = libraries[s].name.split(":");
+							var main_name_ver = main_name_obj[main_name_obj.length - 1];
+							var main_name = main_name_obj.slice(0, main_name_obj.length - 1).join(":");
+							console.log(pprim_cmp, main_name_obj, main_name_ver)
+							if ((!libbbb[main_name])) {
+								libb.push(pprim_cmp);
+								libbb.push(pprim_slow)
+								libbbb[main_name] = ({ name: main_name, ver: main_name_ver, index: (libb.length - 1) });
+							}
+							else if (libbbb[main_name]) {
+								if (main_name_ver > libbbb[main_name].ver) {
+									libb.push(pprim_cmp);
+									libbb.push(pprim_slow);
+									libbbb[main_name] = ({ name: main_name, ver: main_name_ver, index: libbbb[main_name].index });
+									libbb.splice(libbbb[main_name].index, 1);
+									libb.splice(libbbb[main_name].index, 1);
+								}
+							}
+
+						}
+						//libbb=unique(libbb);
+						ssssss = libbb.join(";");
+						str = str.replace("obj.mainClass", ``)
+						var main_part = path.join(__minecraft, `.\\versions\\${num}\\${num}.jar`);
+						var mainclass = (forge) ? (forge_json.mainClass) : (obj.mainClass);
+						ssssss += (`;${main_part}\" ${mainclass}`);
+						ssssss += " ";
+						str += (" -cp \"" + ssssss);
+						console.log(ssssss)
+						var que = "\"";
+						if (!obj.minecraftArguments) {
+							obj.minecraftArguments = "";
+							for (var s = 0; s < obj.arguments.game.length; s++) {
+								var c = obj.arguments.game[s];
+								if (typeof obj.arguments.game[s] == "object") {
+
+									continue;
+								}
+								obj.minecraftArguments += obj.arguments.game[s];
+								obj.minecraftArguments += " ";
+							}
+							if (forge) {
+								for (var s = 0; s < forge_json.arguments.game.length; s++) {
+									obj.minecraftArguments += forge_json.arguments.game[s];
+									obj.minecraftArguments += " ";
+								}
+							}
+							console.log(obj.minecraftArguments)
+						}
+						else {
+							obj.minecraftArguments += (" ");
+						}
+						var version_name = (forge) ? (forgename) : (obj.id);
+						var minecraftArguments = obj.minecraftArguments
+							.replace("${auth_player_name}", que + username + que)
+							.replace("${version_name}", que + version_name + que)
+							.replace("${version_type}", que + launcher.name + launcher.version + que)
+							.replace("${game_directory}", que + __minecraft + que)
+							.replace("${assets_root}", que + (path.join(__minecraft, ".\\assets")) + que)
+							.replace("${assets_index_name}", que + obj.assets + que)
+							.replace("${auth_uuid}", que + "02f3fcd468e1b0a8048e7575c68c4733" + que)
+							.replace("${auth_access_token}", que + "02f3fcd468e1b0a8048e7575c68c4733" + que)
+							.replace("${user_properties}", que + "{}" + que)
+							.replace("${user_type}", que + "Legacy" + que)
+							.replace("${launcher_name}", que + launcher.name + que)
+							.replace("${launcher_version}", que + launcher.version + que)
+							.replace("${classpath}", "")
+						str += minecraftArguments;
+					}
+					//alert(str)
+
+					if (forge) str += "--tweakClass cpw.mods.fml.common.launcher.FMLTweaker";
+					console.log(str)
+					try {
+						var s = cp.execSync(str, { maxBuffer: 2048 * 2048 * 2048 * 2048 });
+						if (s) console.info(s.toString())
+					} catch (e) {
+						console.info(e.toString())
+					}
+					return str;
+				}
+
+
+
+
+				console.log(666)
+				console.log(runminecraft)
+				window.runminecrafta = runminecraft;
+				try {
+
+				} catch (e) { }
+
+

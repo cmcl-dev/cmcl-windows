@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<html>
+<html style="overflow: hidden;">
 
 <head>
     <link rel="shortcut icon" type="image/png" href="command.png" />
@@ -285,32 +285,13 @@
 
 	</script>
     <style>
-        body {
-			overflow: hidden;
-		}
-		input::-webkit-calendar-picker-indicator {
-			display: none;
-			-webkit-appearance: none;
-		}
-
-		input[type="text"] {
-			-webkit-appearance: menulist;
-		}
-
-		input.accept {
-			background: green;
-		}
-
-		input.inaccept {
-			background: red;
-		}
-	</style>
+    </style>
 </head>
 
 <body style="background-attachment:	fixed;background-image:	url(background.jpg);background-size: cover;background-repeat:	no-repeat;background-color:	#39add5;display:	flex;flex-direction: column;">
     <nav class="navbar navbar-expand-sm justify-content-center bg-primary">
         <div class="nav-item" style="display:block;position:absolute;left:0;padding:0;margin:0;justify-content: center;">
-            <span class="nav-link" href="#" style="justify-content: center;">Convenient MCL</span>
+            <span class="nav-link" href="#" style="justify-content: center;padding-right: 30px;">Convenient MCL</span>
         </div>
         <ul class="navbar-nav">
             <li class="nav-item active">
@@ -339,10 +320,37 @@
             </li>
         </ul>
         <div class="nav-item" style="display:inline-block;position:absolute;right:0;padding:0;margin-right:0;justify-content: center;">
-            <span class="nav-link" href="#" style="/*display: inline-block;position: absolute;*/right: 0;padding: 0;/*margin-right: 0;justify-content: center;*/"><i class="fa fa-close"></i></span>
+            <span class="nav-link operation-icon" href="#" style="float:left;left:0;"><i class="fa fa fa-angle-down" onclick="document.querySelector('ul#menu').hidden=!(document.querySelector('ul#menu').hidden)"></i></span>
+            <span class="nav-link operation-icon" href="#" style="right:0;float:right;"><i class="fa fa-close" onclick="nw.Window.get().close()"></i></span>
         </div>
         <div style="height:0.1em;background:#00EEEE;position: absolute;bottom: .5em;width: 100%;z-index:500;"></div>
     </nav>
+    <ul class="list-unstyled mb-0" id="menu" hidden style="display: block;float: right;min-width:10%;position: absolute;right: 0;top: 3rem;background: white;">
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="nw.Window.get().showDevTools()">
+        <span class="d-inline-block bg-success rounded-circle menu"></span>
+        <script>
+                document.write(i18n_native["@title-bar/devtools"]);
+		</script>
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="window.open('chrome://extensions')">
+        <span class="d-inline-block bg-primary rounded-circle menu"></span>
+        <script>
+                document.write(i18n_native["@title-bar/extensions"]);
+		</script>
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="window.open('chrome://chrome-urls')">
+        <span class="d-inline-block bg-danger rounded-circle menu"></span>
+        <script>
+                document.write(i18n_native["@title-bar/chrome-urls"]);
+		</script>
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="window.open('chrome://inspect')">
+        <span class="d-inline-block bg-info rounded-circle menu" ></span>
+        <script>
+                document.write(i18n_native["@title-bar/debug"]);
+		</script>
+      </a></li>
+    </ul>
     <div class="cg" hidden>
         <input type="radio" name="ch" id="p1" onclick="$('.page1').hidden=false;$('.page2').hidden=true ;$('.page3').hidden=true ;$('.page4').hidden=true ;" checked />
         <label for="p1">
@@ -778,7 +786,6 @@ ${args}`, function () {
 		</script>
     </div>
     <div class="page2 page-linker" hidden>
-        
         <h1>
             <!--下载Minecraft：-->
             <script>
@@ -833,7 +840,7 @@ ${args}`, function () {
                 </select>
                 <br />
                 <progress id="forge_downloading" min="0" max="100" hidden></progress>
-                <script src="./packages/dl-interface/forge.js">				</script>
+                <script src="./packages/dl-interface/forge.js"> </script>
             </div>
             <button style="position: absolute;left: 40%;right: 40%;width:20%;border-radius:10px;min-width: 200px;" id="rsdownload" class="btn btn-primary">开始下载</button>
         </div>

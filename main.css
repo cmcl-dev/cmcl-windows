@@ -1,248 +1,305 @@
 /*NAV*/
 
-        @keyframes titlebar {
-			from {
-				background: initial;
-			}
+@keyframes titlebar {
+    from {
+        background: initial;
+    }
 
-			to {
-				background: #00EEEE;
-			}
-		}
+    to {
+        background: #00EEEE;
+    }
+}
 
-		* {
-			-webkit-app-region: no-drag;
-			user-select: none;
-		}
+* {
+    -webkit-app-region: no-drag;
+    user-select: none;
+}
 
-		nav,
-		.navbar-nav,
-		.nav-item {
-			-webkit-app-region: drag;
-		}
+nav,
+.navbar-nav,
+.nav-item {
+    -webkit-app-region: drag;
+}
 
-		nav {
-			background: #00FFFF !important;
-		}
+nav {
+    background: #00FFFF !important;
+}
 
-		span.nav-link {
-			display: block;
-			z-index: 100;
-			color: white;
-			border-radius: 1rem 1rem 0 0;
-			margin-right: 10px;
-			line-height: 15px;
-			cursor: default;
-		}
+span.nav-link {
+    display: block;
+    z-index: 100;
+    color: white;
+    border-radius: 1rem 1rem 0 0;
+    margin-right: 10px;
+    line-height: 15px;
+    cursor: default;
+}
 
-		.nav-linker.active {
-			background: #00EEEE;
-		}
+.nav-linker.active {
+    background: #00EEEE;
+}
 
-		span.nav-linker:hover {
-			animation: titlebar 1s;
-			animation-fill-mode: forwards;
-		}
+span.nav-linker:hover {
+    animation: titlebar 1s;
+    animation-fill-mode: forwards;
+}
 
-		i {
-			padding: 0;
-		}
+i {
+    padding: 0;
+}
 
-		.active {
-			position: relative;
-			background: #00EEEE;
-			border-radius: 10px 10px 0 0;
-		}
+.active {
+    position: relative;
+    background: #00EEEE;
+    border-radius: 10px 10px 0 0;
+}
 
-		.nav-item.active:before,
-		.nav-item.active:after {
-			display: block;
-			position: absolute;
-			content: "";
-			width: 10px;
-			height: 10px;
-			background-color: #00EEEE;
-			bottom: 0px;
-		}
+.nav-item.active:before,
+.nav-item.active:after {
+    display: block;
+    position: absolute;
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: #00EEEE;
+    bottom: 0px;
+}
 
-		.nav-item.active:before {
-			left: -10px;
-		}
+.nav-item.active:before {
+    left: -10px;
+}
 
-		.nav-item.active:after {
-			right: -10px;
-		}
+.nav-item.active:after {
+    right: -10px;
+}
 
-		.nav-linker.active {
-			position: relative;
-			display: block;
-			width: 100px;
-			height: 35px;
-			line-height: 35px;
-		}
+.nav-linker.active {
+    position: relative;
+    display: block;
+    width: 100px;
+    height: 35px;
+    line-height: 35px;
+}
 
-		.nav-linker.act:before,
-		.nav-linker.act:after {
-			display: block;
-			position: absolute;
-			z-index: 99;
-			content: "";
-			width: 20px;
-			height: 20px;
-			border-radius: 100%;
-			background-color: #007bff;
-			bottom: 0px;
-		}
+.nav-linker.act:before,
+.nav-linker.act:after {
+    display: block;
+    position: absolute;
+    z-index: 99;
+    content: "";
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    background-color: #007bff;
+    bottom: 0px;
+}
 
-		.nav-linker.act:before {
-			right: -20px;
-			clip-path: polygon(0 50%, 50% 50%,
-					/*50%*/
-					100% 100%, 0% 100%);
-		}
+.nav-linker.act:before {
+    right: -20px;
+    clip-path: polygon(0 50%, 50% 50%,
+        /*50%*/
+        100% 100%, 0% 100%);
+}
 
-		.nav-linker.act:after {
-			left: -20px;
-		}
+.nav-linker.act:after {
+    left: -20px;
+}
 
-		li.nav-item {
-			padding-left: 1rem;
-			padding-right: 1rem;
-		}
+li.nav-item {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.operation-icon {
+    width: 2rem;
+    height: 2rem;
+    padding: .5rem !important;
+    border-radius: .5em !important;
+}
+
+.operation-icon:hover {
+    background: #003aff;
+    border: 1px solid #003aff;
+}
+
+.menu {
+    width: 5rem;
+    float: right;
+}
+
+.dropdown-menu {
+    position: static;
+    display: block;
+    width: auto;
+    margin: 4rem auto
+}
+
+.dropdown-menu-macos {
+    display: grid;
+    gap: .5rem;
+    padding: .5rem;
+    border-radius: .5rem
+}
+
+.dropdown-menu-macos .dropdown-item {
+    border-radius: .5rem
+}
+
+/*PAGE 1*/
+body {
+    overflow: hidden;
+}
+
+input::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+input[type="text"] {
+    -webkit-appearance: menulist;
+}
+
+input.accept {
+    background: green;
+}
+
+input.inaccept {
+    background: red;
+}
 
 /*PAGE 2*/
 /*DIALOG*/
-.ver_set_div {
-				/* flex使其水平垂直居中的方法：必须在父容器设置，且必须是100vh*/
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
+.ver _set_div {
+    /* flex使其水平垂直居中的方法：必须在父容器设置，且必须是100vh*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-			label.checkbox {
-				width: 50px;
-				height: 25px;
-				border-radius: 12px;
-				background-color: gainsboro;
-				position: relative;
-				overflow: hidden;
-				/*去除在before里面溢出的部分*/
-			}
+label.checkbox {
+    width: 50px;
+    height: 25px;
+    border-radius: 12px;
+    background-color: gainsboro;
+    position: relative;
+    overflow: hidden;
+    /*去除在before里面溢出的部分*/
+}
 
-			label.checkbox input.checkbox::after {
-				content: "";
-				visibility: visible;
-				width: 20px;
-				height: 20px;
-				border-radius: 100%;
-				background-color: white;
-				position: absolute;
-				left: 2px;
-				top: 2px;
-				transition: all 0.2s;
-			}
+label.checkbox input.checkbox::after {
+    content: "";
+    visibility: visible;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    background-color: white;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    transition: all 0.2s;
+}
 
-			label.checkbox input.checkbox {
-				visibility: hidden;
-				/*隐藏多选框*/
-			}
+label.checkbox input.checkbox {
+    visibility: hidden;
+    /*隐藏多选框*/
+}
 
-			label.checkbox input.checkbox::before {
-				content: "";
-				visibility: visible;
-				width: 100%;
-				height: 100%;
-				position: absolute;
-				top: 0;
-				left: 0;
-				transition: all 0.2s;
-			}
+label.checkbox input.checkbox::before {
+    content: "";
+    visibility: visible;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 0.2s;
+}
 
-			label.checkbox input.checkbox:checked::before {
-				background-color: green;
-				/*改变背景色*/
-			}
+label.checkbox input.checkbox:checked::before {
+    background-color: green;
+    /*改变背景色*/
+}
 
-			label.checkbox input.checkbox:checked::after {
-				transform: translateX(25px);
-			}
+label.checkbox input.checkbox:checked::after {
+    transform: translateX(25px);
+}
 
-			#server_downloading:before {
-				display: block;
-			}
+#server_downloading:before {
+    display: block;
+}
 
-			.process {
-				background: red;
-				position: absolute;
-				z-index: 100;
-				width: 300px;
-				height: 10px;
-			}
+.process {
+    background: red;
+    position: absolute;
+    z-index: 100;
+    width: 300px;
+    height: 10px;
+}
 
-			#links {
-				width: 100%;
-				height: 60vh;
-				z-index: 100;
-				overflow: scroll;
-			}
+#links {
+    width: 100%;
+    height: 60vh;
+    z-index: 100;
+    overflow: scroll;
+}
 
-			label.normal {
-				width: 200px;
-				display: inline-block;
-			}
+label.normal {
+    width: 200px;
+    display: inline-block;
+}
 
-			label.width2 {
-				width: 250px;
-				display: inline-block;
-			}
+label.width2 {
+    width: 250px;
+    display: inline-block;
+}
 
-			.pic-btn {
-				width: 3em;
-				height: 3em;
-				padding: 0;
-				margin: 0;
-				border-radius: 100%;
-			}
+.pic-btn {
+    width: 3em;
+    height: 3em;
+    padding: 0;
+    margin: 0;
+    border-radius: 100%;
+}
 
 /*VERSION LIST*/
 .icon {
-				width: 5em;
-				height: 5em;
-				float: left;
-			}
+    width: 5em;
+    height: 5em;
+    float: left;
+}
 
-			.icon-bookshelf {
-				background: url(assets/bookshelf.png);
-				background-size: contain;
-			}
+.icon-bookshelf {
+    background: url(assets/bookshelf.png);
+    background-size: contain;
+}
 
-			.icon-furnace {
-				background: url(assets/furnace.png);
-				background-size: contain;
-			}
+.icon-furnace {
+    background: url(assets/furnace.png);
+    background-size: contain;
+}
 
-			.icon-grass {
-				background: url(assets/grass.png);
-				background-size: contain;
-			}
+.icon-grass {
+    background: url(assets/grass.png);
+    background-size: contain;
+}
 
-			.msg {
-				/*top:1.5em;*/
-				margin-left: 5em;
-				font-size: 1.5em;
-			}
+.msg {
+    /*top:1.5em;*/
+    margin-left: 5em;
+    font-size: 1.5em;
+}
 
-			.x {
-				clear: both;
-				height: 5em;
-			}
+.x {
+    clear: both;
+    height: 5em;
+}
 
-			.x:hover,
-			.msg:hover {
-				background: rgb(28, 198, 234);
-			}
+.x:hover,
+.msg:hover {
+    background: rgb(28, 198, 234);
+}
 
-			/*
+/*
 	datalist    
 	-webkit-appearance: menulist;
 	

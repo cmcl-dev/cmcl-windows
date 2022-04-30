@@ -803,21 +803,23 @@ ${args}`, function () {
             </span><span id="ver_set_span"></span><span style="display:inline-block;position:absolute;right:0;color:white;" onclick="this.parentNode.hidden=true;">&times;</span>
             <br />
             <div class="ver_set_div">
-                &nbsp;&nbsp;&nbsp;
-                <!--客户端:-->
-                <script>
-                    document.write(i18n_native["@download-minecraft/client-label"]);
-				</script>
+                <label class="normal">
+                    <!--客户端:-->
+                    <script>
+                        document.write(i18n_native["@download-minecraft/client-label"]);
+					</script>
+                </label>
                 <label class="checkbox">
                     <input type="checkbox" class="checkbox" id="client_download_confirm" />
                 </label>
             </div>
             <div class="ver_set_div">
-                &nbsp;&nbsp;&nbsp;
-                <!--服务端:-->
-                <script>
-                    document.write(i18n_native["@download-minecraft/server-label"]);
-				</script>
+                <label class="normal">
+                    <!--服务端:-->
+                    <script>
+                        document.write(i18n_native["@download-minecraft/server-label"]);
+					</script>
+                </label>
                 <label class="checkbox">
                     <input type="checkbox" class="checkbox" id="server_download_confirm" onchange="$('#server_downloading').hidden=!$('#server_download_confirm').checked;" />
                 </label>
@@ -826,13 +828,17 @@ ${args}`, function () {
                 <progress id="server_downloading" min="0" max="100" hidden></progress>
             </div>
             <div class="ver_set_div">
-                Optifine:
+                <label class="normal">
+                    Optifine:
+                </label>
                 <label class="checkbox">
                     <input type="checkbox" class="checkbox" />
                 </label>
             </div>
             <div class="ver_set_div">
-                &nbsp;&nbsp;&nbsp;&nbsp;Forge:
+                <label class="normal">
+                    Forge:
+                </label>
                 <label class="checkbox">
                     <input type="checkbox" class="checkbox" onclick="this.checked&&forge_tip();$('#forge_download_fetch').hidden=!this.checked;$('#forge_downloading').hidden=!this.checked" checked="false" id="forge_checked_choose_download" />
                 </label>

@@ -1,0 +1,23 @@
+{
+  "name": "@cmcl/resourcer",
+  "version": "1.0.0",
+  "description": "One of the componments in Convenient MCL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmcl-developing/cmcl-windows.git"
+  },
+  "keywords": [
+    "Minecraft",
+    "Launcher"
+  ],
+  "author": "Edwin lau",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/cmcl-developing/cmcl-windows/issues"
+  },
+  "homepage": "https://github.com/cmcl-developing/cmcl-windows#readme"
+}

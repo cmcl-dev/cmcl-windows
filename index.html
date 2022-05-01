@@ -25,6 +25,11 @@
 		}
 	</style>
     <script>
+        let app={
+    		natives:{
+
+    		}
+    	};
         window.__dirname = localStorage["dirname"] ? localStorage["dirname"] : (process.cwd());
 		//@xmcl/installer
 		//minecraft-launcher-core
@@ -598,194 +603,6 @@
                 document.write(i18n_native["@launch-game/exec-minecraft"]);
 			</script>
         </button>
-        <script>
-            //https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
-			window.down_d=function(num,debug){
-			if(debug==undefined)debug=false;
-			window.download_window=window.open("services.html");
-			download_window.ver_arr=window.ver_arr;
-			download_window.url_arr=window.url_arr;
-			download_window.d_num=num;
-			download_window.debug_judge=debug;
-			download_window.assets_root=assets_root;
-			download_window.__minecraft=__minecraft;
-			};
-			window.download_minecraft = function (version) {
-				localStorage.setItem("data-version", ver_arr[version]);
-				localStorage.setItem("data-target", __minecraft);
-				let Window = nw.Window;
-				Window.open("./packages/dl-interface/index.html", { new_instance: true }, function (win) {
-
-				});
-			}
-			window.onbeforeunload = function () {
-				//window.download_window.close();
-			};
-			document.getElementById("name").value = (localStorage["username"]) ? (localStorage["username"]) : ("hello");
-			setTimeout(function () {
-
-				//".\.minecraft\versions\20w10a\20w10a-natives"
-				const cp = require('child_process')
-				const fs = require('fs')
-				const http = require('http')
-				const https = require('https')
-				const path = require('path')
-				const os = require('os');
-				(function () {
-					let ver = $("#ver");
-					for (var s = 0; s < ver_arr.length; s++) {
-						var o = document.createElement("option")
-						o.value = ver_arr[s];
-						o.innerHTML = ver_arr[s];
-						ver.appendChild(o);
-					}
-					let lists = $("#ver_list");
-					for (var s = 0; s < ver_arr.length; s++) {
-						var o = document.createElement("option")
-						o.value = ver_arr[s];
-						o.innerHTML = type_arr[s];
-						lists.appendChild(o);
-					}
-					setTimeout(function () {
-						jQuery("select#ver").selectpicker()
-						jQuery("select#ver").selectpicker('setStyle', 'btn-sm', 'add');
-					});
-				}
-				)();
-				if (localStorage["--flag-select"] == "native+") {
-					jQuery("select#ver").selectpicker('hide');
-
-					$("#ver_input").oninput = $("#ver_input").onkeydown = $("#ver_input").onchange = function () {
-						let lists = $("#ver_list").options;
-						for (let s = 0; s < lists.length; s++) {
-							if (lists[s].value.toLowerCase().indexOf(this.value.toLowerCase()) == -1) this.className = "inaccept";
-							else {
-								this.className = "accept";
-								if (lists[s].value.toLowerCase() == (this.value.toLowerCase())) {
-									$("#ver").selectedIndex = s;
-									console.log(s)
-								}
-
-								return;
-							}
-						}
-					};
-					$("#ver_input").onblur = function () {
-						let lists = $("#ver_list").options;
-						for (let s = 0; s < lists.length; s++) {
-							if (lists[s].value.toLowerCase() !== (this.value.toLowerCase())) this.className = "inaccept";
-							else {
-								$("#ver").selectedIndex = s;
-								this.className = "";
-								return;
-							}
-						}
-					}
-				}
-
-
-				window.force_ver = function () {
-					let ver = $("#ver");
-					for (var s = 0; s < ver_arr.length; s++) {
-						var o = document.createElement("option")
-						o.value = ver_arr[s];
-						o.innerHTML = ver_arr[s];
-						ver.appendChild(o);
-					}
-				};
-				function unique(arr) {
-					return Array.from(new Set(arr))
-				}
-				
-			}, 1000);
-			function command_ext() {
-				let os_name = require("os").type();
-				return Object({ Windows_NT: "bat", Linux: "sh", "Darwin": "sh" })[os_name];
-			}
-			document.querySelector("#exec_minecraft").onclick = function () {
-				let forge = $("input#forge").checked;
-				let optifine = $("input#optifine").checked;
-				//-Dlog4j2.formatMsgNoLookups=true
-				//准备0.1G=102.4MB内存空间
-				let os = require("os")
-				let fs = require("fs")
-				let Avaliable_Memory = Math.round(os.freemem() / 1024 / 1024 * 10) / 10;//MB
-				console.log("Avaliable Memory:", Avaliable_Memory, "MB")
-				console.log("Minecraft Memory:", Math.round((Avaliable_Memory - 102.4) * 10) / 10, "MB")
-				let Use_Memory = Math.round(Avaliable_Memory - 102.4);
-				let _bit = JSON.parse(require("child_process").execSync("sysbit.exe")).bit
-				let x64 = _bit == "64";
-				const java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "java.exe");
-
-				let username = document.querySelector("input#name").value;
-				if (!username) {
-					alert(i18n_native["@launch-game/tips/empty-player-name"]);
-					return;
-				}
-				console.log("[LAUNCHING PART] SETTING USER NAME:" + username)
-				localStorage["username"] = username;
-				/*
-				let worker=new Worker("./launch-cnf.js");
-				worker.postMessage(JSON.stringify({
-				localStorage:localStorage,
-				version:ver_arr[($('#ver').selectedIndex)],
-				username:document.getElementById("name").value
-				}));
-				*/
-				const launch = require("./new-launch.js").v2;
-				localStorage['history-name'] = JSON.stringify(
-					Array.from(new Set([{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])]))
-				);
-				let usr_arr = [{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])];
-				let usr_list = [];
-				for (let s in usr_arr) usr_list.push(JSON.stringify(usr_arr[s]));
-				usr_list = Array.from(new Set(usr_list));
-
-				for (let s in usr_list) usr_list[s] = (JSON.parse(usr_list[s]));
-				console.log(usr_list);
-				localStorage['history-name'] = JSON.stringify(
-					usr_list
-				);
-				let version_minecraft;
-				if (localStorage["--flag-select"] == "native+") {
-					version_minecraft = ($('#ver_input').value) ? ($('#ver_input').value) : (ver_arr[($('#ver').selectedIndex)]);
-				}
-				else {
-					version_minecraft = ver_arr[($('#ver').selectedIndex)];
-				}
-				if (forge) version_minecraft = $("#forgever").options[$("#forgever").selectedIndex].value;
-				if (optifine) version_minecraft = $("#optifinever").options[$("#optifinever").selectedIndex].value;
-				console.log(username)
-				let args = launch({
-					java_path: java_path,
-					'.minecraft': __minecraft,
-					"version": version_minecraft,
-					settings: {
-						username: username
-					},
-					memory: {
-						max: Use_Memory + "M"
-					}
-				});
-
-				fs.writeFile(path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`), `@echo off
-${args}`, function () {
-					if (localStorage["--flag-no-window"]);
-					else {
-						let cp_worker = new Worker("./cp.js");
-						console.log("Use the safer command:", `start cmd.exe /C \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`)
-						cp_worker.postMessage(`start "Convenient MCLv1.8 - Command Prompt - ${version_minecraft}" \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`);
-					}
-				});
-				console.log(args);
-				if (localStorage["--flag-no-window"]) {
-					let cp_worker = new Worker("./cp.js");
-					cp_worker.postMessage(args);
-				}
-
-			}
-
-		</script>
     </div>
     <div class="page2 page-linker" hidden>
         <h1>
@@ -802,47 +619,49 @@ ${args}`, function () {
 				</script>
             </span><span id="ver_set_span"></span><span style="display:inline-block;position:absolute;right:0;color:white;" onclick="this.parentNode.hidden=true;">&times;</span>
             <br />
-            <div class="ver_set_div">
-                <label class="normal">
-                    <!--客户端:-->
-                    <script>
-                        document.write(i18n_native["@download-minecraft/client-label"]);
+            <fieldset>
+                <div class="ver_set_div">
+                    <label>
+                        <!--客户端:-->
+                        <script>
+                            document.write(i18n_native["@download-minecraft/client-label"]);
 					</script>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" class="checkbox" id="client_download_confirm" />
-                </label>
-            </div>
-            <div class="ver_set_div">
-                <label class="normal">
-                    <!--服务端:-->
-                    <script>
-                        document.write(i18n_native["@download-minecraft/server-label"]);
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" id="client_download_confirm" />
+                    </label>
+                </div>
+                <div class="ver_set_div">
+                    <label>
+                        <!--服务端:-->
+                        <script>
+                            document.write(i18n_native["@download-minecraft/server-label"]);
 					</script>
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" class="checkbox" id="server_download_confirm" onchange="$('#server_downloading').hidden=!$('#server_download_confirm').checked;" />
-                </label>
-            </div>
-            <div style="display:block;display:flex;justify-content: center;align-items: center;">
-                <progress id="server_downloading" min="0" max="100" hidden></progress>
-            </div>
-            <div class="ver_set_div">
-                <label class="normal">
-                    Optifine:
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" class="checkbox" />
-                </label>
-            </div>
-            <div class="ver_set_div">
-                <label class="normal">
-                    Forge:
-                </label>
-                <label class="checkbox">
-                    <input type="checkbox" class="checkbox" onclick="this.checked&&forge_tip();$('#forge_download_fetch').hidden=!this.checked;$('#forge_downloading').hidden=!this.checked" checked="false" id="forge_checked_choose_download" />
-                </label>
-            </div>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" id="server_download_confirm" onchange="$('#server_downloading').hidden=!$('#server_download_confirm').checked;" />
+                    </label>
+                </div>
+                <div style="display:block;display:flex;justify-content: center;align-items: center;">
+                    <progress id="server_downloading" min="0" max="100" hidden></progress>
+                </div>
+                <div class="ver_set_div">
+                    <label>
+                        Optifine:
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" />
+                    </label>
+                </div>
+                <div class="ver_set_div">
+                    <label>
+                        Forge:
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox" onclick="this.checked&&forge_tip();$('#forge_download_fetch').hidden=!this.checked;$('#forge_downloading').hidden=!this.checked" checked="false" id="forge_checked_choose_download" />
+                    </label>
+                </div>
+            </fieldset>
             <div style="display:block;display:flex;justify-content: center;align-items: center;overflow: scroll;">
                 <select id="forge_download_fetch" hidden>
                 </select>
@@ -1352,6 +1171,198 @@ window.dlg_ver=${ss};
                     <button class="pic-btn btn btn-primary" data-toggle="modal" data-target="#modal-add-user" data-dismiss="modal">+</button>
                     <div id="user-list" style="overflow: scroll;">
                     </div>
+                    <script>
+                        //https://bmclapi2.bangbang93.com/forge/download?mcversion=1.16.4&version=35.1.4&category=universal&format=jar
+			window.down_d=function(num,debug){
+			if(debug==undefined)debug=false;
+			window.download_window=window.open("services.html");
+			download_window.ver_arr=window.ver_arr;
+			download_window.url_arr=window.url_arr;
+			download_window.d_num=num;
+			download_window.debug_judge=debug;
+			download_window.assets_root=assets_root;
+			download_window.__minecraft=__minecraft;
+			};
+			window.download_minecraft = function (version) {
+				localStorage.setItem("data-version", ver_arr[version]);
+				localStorage.setItem("data-target", __minecraft);
+				localStorage.setItem("data-url", url_arr[version]);
+				let natives_array=Object.keys(app.natives);
+				localStorage.setItem("data-natives", JSON.stringify(natives_array));
+
+				let Window = nw.Window;
+				Window.open("./packages/dl-interface/index.html", { new_instance: true }, function (win) {
+
+				});
+			}
+			window.onbeforeunload = function () {
+				//window.download_window.close();
+			};
+			document.getElementById("name").value = (localStorage["username"]) ? (localStorage["username"]) : ("hello");
+			setTimeout(function () {
+
+				//".\.minecraft\versions\20w10a\20w10a-natives"
+				const cp = require('child_process')
+				const fs = require('fs')
+				const http = require('http')
+				const https = require('https')
+				const path = require('path')
+				const os = require('os');
+				(function () {
+					let ver = $("#ver");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = ver_arr[s];
+						ver.appendChild(o);
+					}
+					let lists = $("#ver_list");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = type_arr[s];
+						lists.appendChild(o);
+					}
+					setTimeout(function () {
+						jQuery("select#ver").selectpicker()
+						jQuery("select#ver").selectpicker('setStyle', 'btn-sm', 'add');
+					});
+				}
+				)();
+				if (localStorage["--flag-select"] == "native+") {
+					jQuery("select#ver").selectpicker('hide');
+
+					$("#ver_input").oninput = $("#ver_input").onkeydown = $("#ver_input").onchange = function () {
+						let lists = $("#ver_list").options;
+						for (let s = 0; s < lists.length; s++) {
+							if (lists[s].value.toLowerCase().indexOf(this.value.toLowerCase()) == -1) this.className = "inaccept";
+							else {
+								this.className = "accept";
+								if (lists[s].value.toLowerCase() == (this.value.toLowerCase())) {
+									$("#ver").selectedIndex = s;
+									console.log(s)
+								}
+
+								return;
+							}
+						}
+					};
+					$("#ver_input").onblur = function () {
+						let lists = $("#ver_list").options;
+						for (let s = 0; s < lists.length; s++) {
+							if (lists[s].value.toLowerCase() !== (this.value.toLowerCase())) this.className = "inaccept";
+							else {
+								$("#ver").selectedIndex = s;
+								this.className = "";
+								return;
+							}
+						}
+					}
+				}
+
+
+				window.force_ver = function () {
+					let ver = $("#ver");
+					for (var s = 0; s < ver_arr.length; s++) {
+						var o = document.createElement("option")
+						o.value = ver_arr[s];
+						o.innerHTML = ver_arr[s];
+						ver.appendChild(o);
+					}
+				};
+				function unique(arr) {
+					return Array.from(new Set(arr))
+				}
+				
+			}, 1000);
+			function command_ext() {
+				let os_name = require("os").type();
+				return Object({ Windows_NT: "bat", Linux: "sh", "Darwin": "sh" })[os_name];
+			}
+			document.querySelector("#exec_minecraft").onclick = function () {
+				let forge = $("input#forge").checked;
+				let optifine = $("input#optifine").checked;
+				//-Dlog4j2.formatMsgNoLookups=true
+				//准备0.1G=102.4MB内存空间
+				let os = require("os")
+				let fs = require("fs")
+				let Avaliable_Memory = Math.round(os.freemem() / 1024 / 1024 * 10) / 10;//MB
+				console.log("Avaliable Memory:", Avaliable_Memory, "MB")
+				console.log("Minecraft Memory:", Math.round((Avaliable_Memory - 102.4) * 10) / 10, "MB")
+				let Use_Memory = Math.round(Avaliable_Memory - 102.4);
+				let _bit = JSON.parse(require("child_process").execSync("sysbit.exe")).bit
+				let x64 = _bit == "64";
+				const java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "java.exe");
+
+				let username = document.querySelector("input#name").value;
+				if (!username) {
+					alert(i18n_native["@launch-game/tips/empty-player-name"]);
+					return;
+				}
+				console.log("[LAUNCHING PART] SETTING USER NAME:" + username)
+				localStorage["username"] = username;
+				/*
+				let worker=new Worker("./launch-cnf.js");
+				worker.postMessage(JSON.stringify({
+				localStorage:localStorage,
+				version:ver_arr[($('#ver').selectedIndex)],
+				username:document.getElementById("name").value
+				}));
+				*/
+				const launch = require("./new-launch.js").v2;
+				localStorage['history-name'] = JSON.stringify(
+					Array.from(new Set([{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])]))
+				);
+				let usr_arr = [{ name: $("input#name").value, type: 'offline' }, ...JSON.parse(localStorage['history-name'])];
+				let usr_list = [];
+				for (let s in usr_arr) usr_list.push(JSON.stringify(usr_arr[s]));
+				usr_list = Array.from(new Set(usr_list));
+
+				for (let s in usr_list) usr_list[s] = (JSON.parse(usr_list[s]));
+				console.log(usr_list);
+				localStorage['history-name'] = JSON.stringify(
+					usr_list
+				);
+				let version_minecraft;
+				if (localStorage["--flag-select"] == "native+") {
+					version_minecraft = ($('#ver_input').value) ? ($('#ver_input').value) : (ver_arr[($('#ver').selectedIndex)]);
+				}
+				else {
+					version_minecraft = ver_arr[($('#ver').selectedIndex)];
+				}
+				if (forge) version_minecraft = $("#forgever").options[$("#forgever").selectedIndex].value;
+				if (optifine) version_minecraft = $("#optifinever").options[$("#optifinever").selectedIndex].value;
+				console.log(username)
+				let args = launch({
+					java_path: java_path,
+					'.minecraft': __minecraft,
+					"version": version_minecraft,
+					settings: {
+						username: username
+					},
+					memory: {
+						max: Use_Memory + "M"
+					}
+				});
+
+				fs.writeFile(path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`), `@echo off
+${args}`, function () {
+					if (localStorage["--flag-no-window"]);
+					else {
+						let cp_worker = new Worker("./cp.js");
+						console.log("Use the safer command:", `start cmd.exe /C \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`)
+						cp_worker.postMessage(`start "Convenient MCLv1.8 - Command Prompt - ${version_minecraft}" \"${path.join(__dirname, "mcfiles", `last_exec.${command_ext()}`)}\"`);
+					}
+				});
+				console.log(args);
+				if (localStorage["--flag-no-window"]) {
+					let cp_worker = new Worker("./cp.js");
+					cp_worker.postMessage(args);
+				}
+
+			}
+
+		</script>
                     <script>
                         let user_array = [];
 						let user_list = $("#user-list");

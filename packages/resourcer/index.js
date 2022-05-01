@@ -26,7 +26,7 @@ let tasks_libraries = [];
 async function libraries_handler() {
     //Handle Libraries
     //获取.jar资源
-    
+
     let libraries = version_json.libraries;
     for (let i = 0; i < libraries.length; ++i) {
         let artifact = libraries.artifact;
@@ -91,8 +91,12 @@ async function libraries_handler() {
             });
         }
     }
-    for (let i in tasks_libraries){
-        postMessage(JSON.stringify());
+    for (let i in tasks_libraries) {
+        postMessage(JSON.stringify({
+            "type": "add-file",
+            "file-path": tasks_libraries.path,
+            "file-size":tasks_libraries.size
+        }));
     }
 }
 async function main_func() {
@@ -102,13 +106,13 @@ async function main_func() {
     } catch (e) {
         console.warn("fetch error", e);
     }
-    
+
     try {
         version_json = await fetch(version_url).then(v => v.text());
     } catch (e) {
         console.warn("JSON parsing error", e);
     }
-    
+
     do {
 
     } while (0);

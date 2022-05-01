@@ -1,0 +1,4 @@
+@echo off
+echo Convenient MCL - Debugging Mode
+echo node-webkit is running...
+../nw.exe .

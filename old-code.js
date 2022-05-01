@@ -285,8 +285,6 @@ var x64 = (os.arch().indexOf("64")) > 0;
 				let java_path = path.join(__dirname, ".\\jre8-" + (x64 ? "64" : "32"), "bin", "javaw.exe");
 				function runminecraft(num) {
 					let username = $("input#name").value;
-
-
 					console.log("Trying", num)
 					let forgename;
 					let forge = document.getElementById("forge").checked;;

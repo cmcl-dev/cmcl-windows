@@ -1,4 +1,4 @@
 @echo off
-title NWJS
+title Convenient MCL - Debugging Mode
 echo node-webkit is running...
 ..\nw.exe .

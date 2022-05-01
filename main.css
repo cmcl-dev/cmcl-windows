@@ -242,6 +242,10 @@ label.checkbox input.checkbox:checked::after {
     z-index: 100;
     overflow: scroll;
 }
+label {
+    width: 50px;
+    display: inline-block;
+}
 
 label.normal {
     width: 200px;

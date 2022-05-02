@@ -29,9 +29,9 @@ async function libraries_handler() {
 
     let libraries = version_json.libraries;
     for (let i = 0; i < libraries.length; ++i) {
-        let artifact = libraries[i].artifact;
+        let artifact = libraries[i].downloads.artifact;
         //今日目标，Convenient MCL资源获取+渲染
-
+        console.log("[DEBUG]",libraries[i]);
         tasks_libraries.push({
             url: artifact.url,
             path: artifact.path,
@@ -39,7 +39,7 @@ async function libraries_handler() {
             sha1: artifact.sha1
         });
 
-        let classifiers = libraries[i].classifiers;
+        let classifiers = libraries[i].downloads.classifiers;
         if (~natives.indexOf("win32")) {
             let native = classifiers["natives-windows-32"];
             if (!native) break;

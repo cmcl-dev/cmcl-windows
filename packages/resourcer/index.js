@@ -108,13 +108,13 @@ async function main_func() {
     }
 
     try {
-        version_json = await fetch(version_url).then(v => v.text());
+        version_json = JSON.parse(version_text)
     } catch (e) {
         console.warn("JSON parsing error", e);
     }
 
     do {
-
+        libraries_handler()
     } while (0);
 }
 onmessage = function(e) {

@@ -16,6 +16,7 @@
         "@title-bar/devtools":"Devtools",
         "@title-bar/extensions":"Extensions",
         "@title-bar/chrome-urls":"Chrome urls",
+        "@title-bar/debug":"Debug & Inspect",
         "@launch-game/label":"Launch Games",
         "@launch-game/version":"Game Version:",
         "@launch-game/forge":"Forge Version:",
